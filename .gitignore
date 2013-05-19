@@ -1,0 +1,4 @@
+*.log
+build/
+synth.csv
+trace.txt

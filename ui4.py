@@ -10,8 +10,10 @@
 from PyQt4 import QtCore, QtGui
 import pickle
 import pandas as pd
-from CustomGraph import CustomGraph
+import pyqtgraph as pg
 from ROIController import ROIController
+import pyqtgraph.parametertree.parameterTypes as pTypes
+from CustomGraph import CustomGraph
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -127,7 +129,6 @@ class Ui_MainWindow(object):
         self.actionM.setObjectName(_fromUtf8("actionM"))
         self.actionRemove_All = QtGui.QAction(MainWindow)
         self.actionRemove_All.setObjectName(_fromUtf8("actionRemove_All"))
-        self.actionRemove_All.triggered.connect(lambda: roi1.removeROI(0))
         self.actionArrow_3 = QtGui.QAction(MainWindow)
         self.actionArrow_3.setObjectName(_fromUtf8("actionArrow_3"))
         self.actionArrow_4 = QtGui.QAction(MainWindow)
@@ -212,14 +213,21 @@ class Ui_MainWindow(object):
         self.plotwidget_lst.reverse()
         self.actionFile.triggered.connect(self.open)
         self.actionSave.triggered.connect(self.save)
-     
-        #ROI Controller
-        self.roic = ROIController(self.plotwidget_lst)
-        
+        self.actionArrow_1.triggered.connect(lambda: self.insertArrow(1))
+        self.actionArrow_2.triggered.connect(lambda: self.insertArrow(2))
+        self.actionArrow_3.triggered.connect(lambda: self.insertArrow(3))
+        self.actionArrow_4.triggered.connect(lambda: self.insertArrow(4))
+        self.actionArrow_5.triggered.connect(lambda: self.insertArrow(5))
+        self.actionArrow_6.triggered.connect(lambda: self.insertArrow(6))
+        self.actionRemove_All_2.triggered.connect(self.removeArrowAll)
+       
         #ROI function Connect
         self.actionLine.triggered.connect(self.setLineROI)
         self.actionRectangle.triggered.connect(self.setRectROI)
+        self.actionW.triggered.connect(self.setWROI)
+        self.actionM.triggered.connect(lambda: self.setROI(1))
         self.actionRemove_All.triggered.connect(self.removeAll)
+
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -307,16 +315,53 @@ class Ui_MainWindow(object):
     def open(self):
         fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
         name = fname.split("/") 
-        if name[len(name) -1] == 'synth.csv': 
+        self.file_name = name[len(name)-1]
+        if name[len(name)-1] == 'synth.csv': 
             rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
-            lst = [] 
+            self.lst = [] 
  
             for val in rd.value: 
-                lst += [val] 
+                self.lst += [val] 
             
-            self.graph = CustomGraph(lst, self.plotwidget_lst)
+            self.graph = CustomGraph(self.lst, self.plotwidget_lst)
+            self.arrowParameter = ArrowParameter(name='Arrow')
+            self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
+            self.treeWidget_2.setParameters(self.parameter, showTop=False)
+
+            #ROI Controller
+            self.roic = ROIController(self.plotwidget_lst)
+ 
+        elif name[len(name)-1].split(".")[1] == "st":
+            f = open(name[len(name)-1], 'r')
+            settings = pickle.load(f)
+            f.close()
+            graph_file = './' + settings['file_name']
+            rd = pd.read_csv(str(graph_file), index_col=[0], header=None, names=['dt', 'value'])
+            self.lst = [] 
+            
+            for val in rd.value:
+                self.lst += [val]
+
+            self.graph = CustomGraph(self.lst, self.plotwidget_lst)
+            
+            self.graph.restoreRegion(settings['region_width'])
+
+        self.arrow_lst = []
             
     def save(self):
+        fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/')
+        name = fname.split("/")
+        
+        region_width_lst = []
+        for region in self.graph.region_lst:
+            region_width_lst.append(region.getRegion())
+
+        settings = {'file_name': self.file_name, 'region_width': region_width_lst}
+
+        f = open(name[len(name)-1] + ".st", 'w+')
+        pickle.dump(settings, f)
+        f.close()
+
         main_setting = self.splitter_3.sizes()
         control_setting = self.splitter.sizes()
         graph_setting = self.splitter_2.sizes()
@@ -329,6 +374,7 @@ class Ui_MainWindow(object):
         settings = {'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
         f = open('setting', 'w+')
         pickle.dump(settings, f)
+        f.close()
 
     def restore(self):
         try:
@@ -341,18 +387,140 @@ class Ui_MainWindow(object):
         
         except IOError:
             self.setSize()
+    
+    def insertArrow(self, arrow_type):
+        arrow_lst = []
+        for widget in self.plotwidget_lst:
+            if arrow_type == 1:
+                arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+            elif arrow_type == 2:
+                arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+            elif arrow_type == 3:
+                arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+            elif arrow_type == 4:
+                arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+            elif arrow_type == 5:
+                arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+            else:
+                arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
 
+            x1, x2 = self.plotwidget_lst[7].getViewBox().viewRange()[0]
+            arrow.setPos(int((x2-x1)/2 + x1), self.lst[int((x2-x1)/2 + x1)])
+            widget.addItem(arrow)
+            arrow_lst.append(arrow)
+        
+        self.arrow_lst.append(arrow_lst)
+        self.arrowParameter.addArrow(int((x2-x1)/2 + x1), arrow_type)
+
+    def removeArrowAll(self):
+        for arrow_lst in self.arrow_lst:
+            for (arrow, widget) in zip(arrow_lst, self.plotwidget_lst):
+                widget.removeItem(arrow)
+        
+        self.arrowParameter.removeArrowAll()
+ 
+    def removeArrowAll(self):
+        self.clearChildren()
+
+    def dra(ev):
+        pg.ViewBox.MouseDragEvent(self.plotwidget_lst[7].getViewBox(), ev)
+
+    def setROI(self, shape):
+        self.Filter = ROIposfilter()
+        
+        self.plotwidget_lst[7].getViewBox().setMouseMode(pg.ViewBox.RectMode)
+        #self.plotwidget_lst[7].getViewBox().mouseDragEvent = self.dra
+        self.plotwidget_lst[7].installEventFilter(self.Filter)
+        
+    def dragev(ev):
+        if ev.button() == QtCore.Qt.LeftButton:
+            pos = ev.pos()
+            ax = QtCore.QRectF(Point(ev.buttonDownPos(ev.button())), Point(pos))
+            #ax = self.childGroup.mapRectFromParent(ax)
+            pg.ViewBox.showAxRect(ax)
+        else:
+            pg.ViewBox.mouseDragEvent (self, ev)
+   
     def setLineROI(self):
-        self.roic.setROI(0)
+        x1, x2 = self.plotwidget_lst[7].getViewBox().viewRange()[0]
+        y = self.lst[int ((x2-x1)/2+x1)]
+        self.roic.setROI(0, ((x1, y),(x2, y)))
 
     def setRectROI(self):
         self.roic.setROI(1)
 
+    def setWROI(self):
+        self.roic.setROI(2)
+
+    def setMROI(self):
+        self.roic.setROI(4)
+
+    def setTriangleROI(self):
+        self.roic.setROI(4)
+
     def removeAll(self):
         self.roic.removeAll()
+        self.roiParameter.removeROIAll()
+
+               
+class ArrowParameter(pTypes.GroupParameter):
+    def __init__(self, **opts):
+        opts['type'] = 'group'
+        pTypes.GroupParameter.__init__(self, **opts)
+        self.num = 0
+ 
+    def addArrow(self, x_pos, arrow_type):
+        self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
+            {'name': 'Position', 'type': 'float', 'value': x_pos},
+            {'name': 'Arrow Type', 'type': 'int', 'value': arrow_type}
+        ]})
+        self.num += 1
+
+class ROIParameter(pTypes.GroupParameter):                                                                                                                                                                  
+    def __init__(self, **opts): 
+        opts['type'] = 'group'
+        pTytpes.GroupParameter.__init__(self, **opts)
+        self.num = 0                                                                                                                                                                                       
+    def addROI(self, x_pos, ROI_type):                                                                                                                                                                 
+        self.addChild({'name': 'ROI' + str(self,num), 'type': 'group', 'children': [                                                                                                                  
+            {'name': 'Position', 'type': 'float', 'value': x_pos},                                                                                                                                    
+            {'name': 'ROI Type', 'type': 'int', 'value': ROI_type}                                                                                                                                      
+            ]})                                                                                                                                                                                
+        self.num += 1                                                                                                                                                                          
+ 
+    def removeROIAll(self):                                                                                                                                                                
+        self.clearChildren()  
+
+class ROIposfilter(QtCore.QObject):
+    def eventFilter(self, obj, event):
+        print event.type()
+        event.ignore()
+        if event.type() == QtCore.QEvent.DragEnter:
+            self.x1, self.y1 = event.pos.x, event.pos.y
+            print "dragstart"
+            return True
+        elif event.type() == QtCore.QEvent.Drop:
+            print "dragend"
+            self.x2, self.y2 = event.pos.x, event.pos.y
+            self.plotwidget_lst[7].removeEventFilter(self.Filter)
+            x = self.roic.setROI(shape, ((self.x1, self.y1), (self.x2, self.y2)))
+            self.roiParameter.addROI(x, shape)
+            return True
+        elif event.type() == QtCore.QEvent.MouseButtonPress:
+            print  "clk"
+            return True
+        elif event.type() == QtCore.QEvent.MouseButtonRelease:
+            print "rel"
+            return True
+        elif event.type() == QtCore.QEvent.KeyPress:
+            print event.key()
+            if event.key() == QtCore.Qt.Key_Delete:
+                obj.setMouseMode(pg.ViewBox.PanMode)
+            return True
+        return False
 
 from pyqtgraph import PlotWidget
-from pyqtgraph.parametertree import ParameterTree
+from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
 
 if __name__ == "__main__":
     import sys

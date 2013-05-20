@@ -5,4 +5,4 @@ trace.txt
 *.pyc
 *.swp
 setting
-
+*.st

@@ -6,17 +6,21 @@ import numpy as np
 
 
 class ROIController:
+    '''ROI 관리를 위한 클래스'''
     def __init__(self, ui):
         self.roi_lst = []
         self.ui = ui
         self.widget_lst = ui.plotwidget_lst
 
     def setROI(self, shape, rect=((10, 10), (20, 20))):
+        '''ROI 추가를 위한 메서드. 좌상, 우하 좌표와, 모양을 인자로 받아
+        선형, 사각형, 다선형, 삼각형, 원형의 ROI를 추가한다'''
         make = [pg.LineROI, pg.RectROI]
         roi_lst = []
         roi_id = len(self.roi_lst)
 
         def update(roi):
+            '''ROI에 변화가 생겼을 대에 이를 다른 뷰에 적용시킨다'''
             state = roi.saveState()
             for r in self.roi_lst[roi_id]:
                 r.setAngle(state['angle'], update=False)
@@ -24,6 +28,7 @@ class ROIController:
                 r.setSize(state['size'], update=False)
 
         def clicked(roi):
+            '''ROI 우클릭 시에 팝업 윈도우를 보여준다'''
             ROIPopup(roi, self.ui)
             print "clicked"
 
@@ -36,7 +41,7 @@ class ROIController:
         for widget in self.widget_lst:
             if shape == 0:
                 roi = pg.LineROI([x1, y1], [x2, 2 * y1 - y2],
-                        width=1, pen=(1, 9))
+                        width=0, pen=(1, 9))
             elif shape == 1:
                 roi = pg.RectROI([x, y], [xlen, ylen], pen=(3, 9))
             elif shape == 2:
@@ -54,6 +59,8 @@ class ROIController:
                 roi = pg.EllipseROI([x, y], [xlen, ylen], pen=(4, 9))
             else:
                 raise Exception("Shape unbound")
+
+            # 시그널 연결
             roi.sigRegionChanged.connect(update)
             roi.setAcceptedMouseButtons(QtCore.Qt.RightButton)
             roi.sigClicked.connect(clicked)
@@ -79,6 +86,7 @@ class ROIController:
 
 
 class ROIPopup(QtGui.QWidget):
+    '''팝업 윈도우 위젯 클래스'''
     def __init__(self, roi, ui):
         QtGui.QWidget.__init__(self)
         self.roi = roi

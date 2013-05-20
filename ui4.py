@@ -527,6 +527,7 @@ class Ui_MainWindow(object):
             self.roic = ROIController(self)
             self.roi_setting_lst = []
 
+            # ROI Restore
             for roi in settings['roi']:
                 if roi == None:
                     continue
@@ -721,6 +722,10 @@ class Ui_MainWindow(object):
  
     # ROI
     def dragev(self, ev, i, shape):
+        '''ROI를 삽입할 때의 마우스 드래그 이벤트 관리 함수이다.
+        마우스로 드래그한 영역의 좌표를 계산하여, 이를 바탕으로 
+        ROI를 삽입한다'''
+
         ev.accept()
         vb = self.plotwidget_lst[i].getViewBox()
         pos = ev.pos()
@@ -748,6 +753,9 @@ class Ui_MainWindow(object):
             pg.ViewBox.mouseDragEvent(vb, ev)
 
     def setROI(self, shape):
+        '''드래그로 범위 지정을 하기위해 위젯 뷰의 마우스
+        이벤트를 조작한다.'''
+        
         self.roi_loc = 1
         self.plotwidget_lst[0].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 0, shape))
         self.plotwidget_lst[1].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 1, shape))
@@ -759,12 +767,16 @@ class Ui_MainWindow(object):
         self.plotwidget_lst[7].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 7, shape))
 
     def restoreROI(self, coor, num, shape):
+        '''OPEN 시에 ROI를 복구하는 메서드이다'''
+        
         (x1, _), (x2, _) = coor
         self.roic.setROI(shape, coor)
         self.roiParameter.restoreROI(datetime.fromtimestamp((x1+x2)/2000).strftime('%y-%m-%d %H:%M:%S'), num, shape)
         self.roi_setting_lst.append({'coor': coor, 'num': num, 'shape': shape})
  
     def removeROIByObj(self, roi):
+        '''ROI 오브젝트를 인자로 받아 해당 ROI를 제거한다'''
+
         roi_num = 0
         for rois in self.roic.getROIList():
             if rois == None:
@@ -788,6 +800,7 @@ class Ui_MainWindow(object):
         self.roiParameter.removeROI("ROI"+str(roi_num))
 
     def removeROIByItem(self, item):
+        '''Parameter의 ROI 아이템을 인자로 받아 해당 ROI를 제거하는 메서드'''
         roi_num = int(item.text(0).split("ROI")[1])
         for i in xrange(len(self.roi_setting_lst)):
             if self.roi_setting_lst[i] == None:
@@ -1034,7 +1047,8 @@ class Window(QtGui.QMainWindow):
         self.ui.save_setting()
 
 class ROIParameter(pTypes.GroupParameter):
- 
+    '''Control Panel에 ROI를 추가/제거하기 위한 클래스이다.'''
+    
     def __init__(self, **opts):
         opts['type'] = 'group'
         pTypes.GroupParameter.__init__(self, **opts)
@@ -1042,6 +1056,8 @@ class ROIParameter(pTypes.GroupParameter):
         self.toshape = ['Line', 'Rectangle', 'W', 'M', 'Triangle', 'Ellipse']
     
     def addROI(self, x_pos, shape):
+        '''ROI의 위치와 모양 정보를 Control Panel에 추가하는 메서드이다.'''
+
         self.addChild({'name': 'ROI' + str(self.roi_num), 'type': 'group', 'children': [
             {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
             {'name': 'Shape', 'type': 'str', 'value': self.toshape[shape], 'readonly': True}
@@ -1050,6 +1066,7 @@ class ROIParameter(pTypes.GroupParameter):
         return self.roi_num - 1
        
     def restoreROI(self, x_pos, num, shape):
+        '''OPEN 시에 ROI의 정보를 복원하는 메서드이다.'''
         self.addChild({'name': 'ROI' + str(num), 'type': 'group', 'children': [
             {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
             {'name': 'Shape', 'type': 'str', 'value': self.toshape[shape], 'readonly': True}

@@ -497,7 +497,7 @@ class Ui_MainWindow(object):
 
             for val in rd.value: 
                 self.lst += [val] 
-
+                  
             #화살표 리스트 초기화
             self.arrow_lst = []
             self.arrow_setting_lst = []
@@ -523,6 +523,18 @@ class Ui_MainWindow(object):
                 arrow_type = arrow['type']
                 self.arrowRestore(x, y, num, arrow_type)
 
+            #ROI Controller
+            self.roic = ROIController(self)
+            self.roi_setting_lst = []
+
+            for roi in settings['roi']:
+                if roi == None:
+                    continue
+                coor = roi['coor']
+                num = roi['num']
+                shape = roi['shape']
+                self.restoreROI(coor, num, shape)
+         
     def save_setting(self):
         # 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
         main_setting = self.splitter_3.sizes()
@@ -559,7 +571,7 @@ class Ui_MainWindow(object):
             if graph != 0:
                 graph_num += 1
 
-        settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst}
+        settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst, 'roi': self.roi_setting_lst}
 
         f = open(name[len(name)-1] + ".st", 'w+')
         pickle.dump(settings, f)
@@ -586,7 +598,7 @@ class Ui_MainWindow(object):
             if graph != 0:
                 graph_num += 1
 
-        settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst}
+        settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst, 'roi': self.roi_setting_lst}
 
         f = open(name[len(name)-1] + ".st", 'w+')
         pickle.dump(settings, f)
@@ -729,7 +741,7 @@ class Ui_MainWindow(object):
                 self.roic.setROI(shape, ((fx1, fy1), (fx2, fy2)))
                 self.roi_loc = 0
                 num = self.roiParameter.addROI(datetime.fromtimestamp((fx1+fx2)/2000).strftime('%y-%m-%d %H:%M:%S'), shape)
-                self.roi_setting_lst.append({'x': (fx1+fx2)/2, 'num': num, 'type': shape})
+                self.roi_setting_lst.append({'coor': ((fx1, fy1), (fx2, fy2)), 'num': num, 'shape': shape})
             else:                                                                                                               
                 vb.updateScaleBox(ev.buttonDownPos(), ev.pos())
         else:
@@ -746,6 +758,12 @@ class Ui_MainWindow(object):
         self.plotwidget_lst[6].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 6, shape))
         self.plotwidget_lst[7].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 7, shape))
 
+    def restoreROI(self, coor, num, shape):
+        (x1, _), (x2, _) = coor
+        self.roic.setROI(shape, coor)
+        self.roiParameter.restoreROI(datetime.fromtimestamp((x1+x2)/2000).strftime('%y-%m-%d %H:%M:%S'), num, shape)
+        self.roi_setting_lst.append({'coor': coor, 'num': num, 'shape': shape})
+ 
     def removeROIByObj(self, roi):
         roi_num = 0
         for rois in self.roic.getROIList():
@@ -782,13 +800,8 @@ class Ui_MainWindow(object):
     
     def popupROI(self):
         ROIPopup(self)
-        print "popup"
 
     def removeROIAll(self):
-        '''for roi_lst in self.roi_lst:
-            for (roi, widget) in zip(roi_lst, self.plotwidget_lst):
-                widget.removeItem(roi)
-        self.roi_lst = []'''
         self.roic.removeAll()
         self.roiParameter.removeROIAll()
 
@@ -1036,7 +1049,7 @@ class ROIParameter(pTypes.GroupParameter):
         self.roi_num += 1
         return self.roi_num - 1
        
-    def restoreROI(self, x_pos, num, arrow_type):
+    def restoreROI(self, x_pos, num, shape):
         self.addChild({'name': 'ROI' + str(num), 'type': 'group', 'children': [
             {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
             {'name': 'Shape', 'type': 'str', 'value': self.toshape[shape], 'readonly': True}

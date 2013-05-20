@@ -5,65 +5,54 @@ from pyqtgraph.Qt import QtCore, QtGui
 import numpy as np
 
 class ROIController:
-    def __init__(self, views):
-        self.rois = []
-        self.views = views
-
-    def setROI(self, shape):
+    def __init__(self, widget_lst):
+        self.roi_lst = []
+        self.widget_lst = widget_lst
+      
+    def setROI(self, shape, rect=((10, 10), (20,20))):
         make = [pg.LineROI, pg.RectROI]
-        roi = None
-        if shape == 0:
-            roi = pg.LineROI([0, 20], [40, 20], width=1, pen=(1,9))
-        elif shape == 1:
-            roi = pg.RectROI([20, 20], [40, 40], pen=(5,9))
-        else:
-            roi = pg.CircleROI([80, 50], [20, 20], pen=(4,9))
-        self.rois.append(roi)
-        for view in self.views:
-            view.addItem(roi)
+        roi_lst = []
+        roi_id = len(self.roi_lst)
+        def update(roi):
+            state = roi.saveState()
+            for r in self.roi_lst[roi_id]:
+                r.setAngle(state['angle'], update=False)
+                r.setPos(state['pos'], update=False)
+                r.setSize(state['size'], update=False)
 
+        (x1, y1), (x2, y2) = rect
+        x = min(x1, x2)
+        y = min(y1, y2)
+        xlen = abs(x1-x2)
+        ylen = abs(y1-y2)
+
+        for widget in self.widget_lst:
+           if shape == 0:
+               roi = pg.LineROI([x1, y1], [x2, y2], width=1, pen=(1,9))
+           elif shape == 1:
+               roi = pg.RectROI([x, y], [xlen, ylen], pen=(3,9))
+           elif shape == 2:
+               roi = pg.PolyLineROI([[x, y+ylen], [x+xlen/4, y], [x+xlen/2, y+ylen], [x+xlen*3/4, y], [x+xlen, y+ylen]], closed=False, pen=(5,9))
+           elif shape == 3:
+               roi = pg.PolyLineROI([[x, y], [x+xlen/4, y+ylen], [x+xlen/2, y], [x+xlen*3/4, y+ylen], [x+xlen, y]], closed=False, pen=(7,9))
+           elif shape == 4:
+               roi = pg.PolyLineROI([[x, y], [x+xlen/2, y+ylen], [x+xlen, y]], closed=True, pen=(9,9))
+           else:
+               roi = pg.CircleROI([80, 50], [20, 20], pen=(4,9))
+           roi.sigRegionChanged.connect(update)
+           widget.addItem(roi)
+           roi_lst.append(roi)
+        self.roi_lst.append(roi_lst)
+        return x
+    
     def removeROI(self, index):
-        for view in self.views:
-            view.removeItem(self.rois[index])
-        del self.rois[index]
+        for (roi, widget) in zip(self.roi_lst[index], self.widget_lst):
+            widget.removeItem(roi)
+        self.roi_lst[index] = []
 
     def removeAll(self):
-        while self.rois != []:
-            self.removeROI(0)
+        for index in xrange(len(self.roi_lst)):
+            self.removeROI(index)
 
     def getROIList(self):
-        return self.rois
-
-
-if __name__ == "__main__":
-    arr = np.ones((100, 100), dtype=float)
-    arr[45:55, 45:55] = 0
-    arr[25, :] = 5
-    arr[:, 25] = 5
-    arr[75, :] = 5
-    arr[:, 75] = 5
-    arr[50, :] = 10
-    arr[:, 50] = 10
-    arr += np.sin(np.linspace(0, 20, 100)).reshape(1, 100)
-    arr += np.random.normal(size=(100,100))
-
-    app = QtGui.QApplication([])
-    win = pg.GraphicsWindow(size=(800, 800), border=True)
-    win.setWindowTitle('ROI test window')
-    w1 = win.addLayout(row=0, col=0)
-    v1a = w1.addViewBox(row=1, col=0, lockAspect=True)
-    v1b = w1.addViewBox(row=2, col=0, lockAspect=True)
-    img1a = pg.ImageItem(arr)
-    v1a.addItem(img1a)
-    img1b = pg.ImageItem()
-    v1b.addItem(img1b)
-    roia = ROIController([v1a])
-    roia.setROI(0)
-    roia.setROI(1)
-    roia.setROI(2)
-    print roia.rois[1].saveState()
-    roia.removeROI(2)
-    roia.removeAll()
-    import sys
-    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-        QtGui.QApplication.instance().exec_()
+        return self.roi_lst

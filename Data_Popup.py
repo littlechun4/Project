@@ -14,6 +14,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
@@ -105,7 +106,7 @@ class Ui_Dialog(object):
         self.max_lst = [self.lineEdit, self.lineEdit_2, self.lineEdit_3, self.lineEdit_4, self.lineEdit_5, self.lineEdit_6, self.lineEdit_7, self.lineEdit_8]
 
         self.min_lst = [self.lineEdit_9, self.lineEdit_10, self.lineEdit_11, self.lineEdit_12, self.lineEdit_13, self.lineEdit_14, self.lineEdit_15, self.lineEdit_16]
-    
+
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
@@ -123,14 +124,15 @@ class Ui_Dialog(object):
         self.label_9.setText(QtGui.QApplication.translate("Dialog", "Max", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("Dialog", "Min", None, QtGui.QApplication.UnicodeUTF8))
 
+
 class DataStat_Dialog(QtGui.QDialog):
     def __init__(self, values):
         self.dialog = QtGui.QDialog()
         self.ui = Ui_Dialog()
         self.ui.setupUi(self.dialog)
 
-        self.ui.pushButton.clicked.connect(lambda:QtGui.QDialog.reject(self.dialog))
-        
+        self.ui.pushButton.clicked.connect(lambda: QtGui.QDialog.reject(self.dialog))
+
         self.setValue(values)
         self.dialog.show()
         self.dialog.exec_()

@@ -1029,10 +1029,7 @@ class Ui_MainWindow(object):
                 self.roic.removeROI(i)
                 break
         self.roiParameter.removeROI(item.text(0))
-    
-    def popupROI(self):
-        ROIPopup(self)
-
+   
     def removeROIAll(self):
         self.roic.removeAll()
         self.roiParameter.removeROIAll()

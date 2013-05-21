@@ -84,6 +84,10 @@ class ROIController:
     def getROIList(self):
         return self.roi_lst
 
+    def clear(self):
+        self.removeAll()
+        self.roi_lst = []
+
 
 class ROIPopup(QtGui.QWidget):
     '''팝업 윈도우 위젯 클래스'''

@@ -614,6 +614,8 @@ class Ui_MainWindow(object):
         for widget in self.plotwidget_lst:
             widget.clear()
 
+        self.roic.clear()
+
         self.arrowParameter.remove()
         self.roiParameter.remove()
 

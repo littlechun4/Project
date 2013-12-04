@@ -18,7 +18,7 @@ lst = []
 for val in rd.value:
 	lst += [val]
 
-g = CustomGraph(lst)
+g = CustomGraph(lst, w)
 w.addItem(g)
 
 #g = w.plot(y=lst)

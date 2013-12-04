@@ -2,12 +2,13 @@ import pyqtgraph as pg
 from pyqtgraph import QtCore, QtGui
 
 class CustomGraph(pg.GraphicsObject):
-	def __init__(self, data):
+	def __init__(self, data, widget):
 		pg.GraphicsObject.__init__(self)
-		g = pg.plot(y=data)
+		g = widget.plot(y=data)
 		self.picture = QtGui.QPicture()
-		region = pg.LinearRegionItem([30000, 70000])
+		region = pg.LinearRegionItem([20000, 30000])
 		region.setZValue(10)
+		widget.addItem(region)
 
 	def paint(self, p, *args):
 		p.drawPicture(0, 0, self.picture)

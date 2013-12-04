@@ -8,6 +8,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
+from CustomGraph import CustomGraph
 import pandas as pd
 
 try:
@@ -17,7 +18,7 @@ except AttributeError:
 
 class Ui_MainWindow(object):
 	def showDialog(self): 
-		fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '/home') 
+		fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
 		name = fname.split("/") 
 		if name[len(name) -1] == 'synth.csv': 
 			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
@@ -25,8 +26,8 @@ class Ui_MainWindow(object):
  
 			for val in rd.value: 
 			    lst += [val] 
- 
-			p1 = self.graphicsView.plot(title="Plot" , y = lst) 
+			
+			g = CustomGraph(lst, self.graphicsView)
 		else: 
 			print 4
 

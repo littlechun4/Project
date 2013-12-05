@@ -291,14 +291,26 @@ class Ui_MainWindow(object):
 			
 
 	def save(self):
-		setting = self.splitter_2.sizes()
+		main_setting = self.splitter_3.sizes()
+		control_setting = self.splitter.sizes()
+		graph_setting = self.splitter_2.sizes()
+
+		graph_num = 0
+		for graph in graph_setting:
+			if graph != 0:
+				graph_num += 1
+
+		settings = {'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
 		f = open('setting', 'w+')
-		pickle.dump(setting, f)
+		pickle.dump(settings, f)
 
 	def open(self):
 		f = open('setting', 'r')
-		setting = pickle.load(f)
-		self.splitter_2.setSizes(setting)
+		settings = pickle.load(f)
+		self.splitter_3.setSizes(settings['main'])
+		self.splitter.setSizes(settings['control'])
+		self.graphWindow(settings['graph_num'])
+		self.splitter_2.setSizes(settings['graph'])
 
 from pyqtgraph.parametertree import ParameterTree
 

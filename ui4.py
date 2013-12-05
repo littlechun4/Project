@@ -8,6 +8,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
+import pickle
 
 try:
 	_fromUtf8 = QtCore.QString.fromUtf8
@@ -204,6 +205,8 @@ class Ui_MainWindow(object):
 		self.menubar.addAction(self.menuBG_Fill.menuAction())
 
 		self.graph_lst = [self.graphicsView, self.graphicsView_2, self.graphicsView_3, self.graphicsView_4, self.graphicsView_5, self.graphicsView_6, self.graphicsView_7, self.graphicsView_8]
+		self.actionSave.triggered.connect(self.save)
+		self.actionFile.triggered.connect(self.open)
 
 		self.retranslateUi(MainWindow)
 		self.setSize()
@@ -272,12 +275,30 @@ class Ui_MainWindow(object):
 
 	def graphWindow(self, num):
 		idx = 0
+		width = self.splitter_2.height()/num
+		lst = []
+
 		for graph in self.graph_lst:
 			if num > idx:
 				graph.show()
+				lst.append(width)
 			else:
 				graph.hide()
+				lst.append(0)
 			idx += 1
+
+		self.splitter_2.setSizes(lst)
+			
+
+	def save(self):
+		setting = self.splitter_2.sizes()
+		f = open('setting', 'w+')
+		pickle.dump(setting, f)
+
+	def open(self):
+		f = open('setting', 'r')
+		setting = pickle.load(f)
+		self.splitter_2.setSizes(setting)
 
 from pyqtgraph.parametertree import ParameterTree
 

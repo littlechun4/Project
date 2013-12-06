@@ -206,8 +206,8 @@ class Ui_MainWindow(object):
 		self.menubar.addAction(self.menuArrow.menuAction())
 		self.menubar.addAction(self.menuBG_Fill.menuAction())
 
-		self.graph_lst = [self.graphicsView, self.graphicsView_2, self.graphicsView_3, self.graphicsView_4, self.graphicsView_5, self.graphicsView_6, self.graphicsView_7, self.graphicsView_8]
-		self.graph_lst.reverse()
+		self.plotwidget_lst = [self.graphicsView, self.graphicsView_2, self.graphicsView_3, self.graphicsView_4, self.graphicsView_5, self.graphicsView_6, self.graphicsView_7, self.graphicsView_8]
+		self.plotwidget_lst.reverse()
 		self.actionFile.triggered.connect(self.open)
 		self.actionSave.triggered.connect(self.save)
 		
@@ -282,7 +282,7 @@ class Ui_MainWindow(object):
 		width = self.splitter_2.height()/num
 		lst = []
 
-		for graph in reversed(self.graph_lst):
+		for graph in reversed(self.plotwidget_lst):
 			if num > idx:
 				graph.show()
 				lst.append(width)
@@ -304,8 +304,8 @@ class Ui_MainWindow(object):
 			for val in rd.value: 
 			    lst += [val] 
 			
-			g = CustomGraph(lst, self.graphicsView)
-
+			self.graph = CustomGraph(lst, self.plotwidget_lst)
+			
 	def save(self):
 		main_setting = self.splitter_3.sizes()
 		control_setting = self.splitter.sizes()

@@ -9,6 +9,8 @@
 
 from PyQt4 import QtCore, QtGui
 import pickle
+import pandas as pd
+from CustomGraph import CustomGraph
 
 try:
 	_fromUtf8 = QtCore.QString.fromUtf8
@@ -37,22 +39,22 @@ class Ui_MainWindow(object):
 		self.splitter_2 = QtGui.QSplitter(self.splitter_3)
 		self.splitter_2.setOrientation(QtCore.Qt.Vertical)
 		self.splitter_2.setObjectName(_fromUtf8("splitter_2"))
-		self.graphicsView = QtGui.QGraphicsView(self.splitter_2)
-		self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
-		self.graphicsView_2 = QtGui.QGraphicsView(self.splitter_2)
-		self.graphicsView_2.setObjectName(_fromUtf8("graphicsView_2"))
-		self.graphicsView_3 = QtGui.QGraphicsView(self.splitter_2)
-		self.graphicsView_3.setObjectName(_fromUtf8("graphicsView_3"))
-		self.graphicsView_4 = QtGui.QGraphicsView(self.splitter_2)
-		self.graphicsView_4.setObjectName(_fromUtf8("graphicsView_4"))
-		self.graphicsView_5 = QtGui.QGraphicsView(self.splitter_2)
-		self.graphicsView_5.setObjectName(_fromUtf8("graphicsView_5"))
-		self.graphicsView_6 = QtGui.QGraphicsView(self.splitter_2)
-		self.graphicsView_6.setObjectName(_fromUtf8("graphicsView_6"))
-		self.graphicsView_8 = QtGui.QGraphicsView(self.splitter_2)
+		self.graphicsView_8 = PlotWidget(self.splitter_2)
 		self.graphicsView_8.setObjectName(_fromUtf8("graphicsView_8"))
-		self.graphicsView_7 = QtGui.QGraphicsView(self.splitter_2)
+		self.graphicsView_7 = PlotWidget(self.splitter_2)
 		self.graphicsView_7.setObjectName(_fromUtf8("graphicsView_7"))
+		self.graphicsView_6 = PlotWidget(self.splitter_2)
+		self.graphicsView_6.setObjectName(_fromUtf8("graphicsView_6"))
+		self.graphicsView_5 = PlotWidget(self.splitter_2)
+		self.graphicsView_5.setObjectName(_fromUtf8("graphicsView_5"))
+		self.graphicsView_4 = PlotWidget(self.splitter_2)
+		self.graphicsView_4.setObjectName(_fromUtf8("graphicsView_4"))
+		self.graphicsView_3 = PlotWidget(self.splitter_2)
+		self.graphicsView_3.setObjectName(_fromUtf8("graphicsView_3"))
+		self.graphicsView_2 = PlotWidget(self.splitter_2)
+		self.graphicsView_2.setObjectName(_fromUtf8("graphicsView_2"))
+		self.graphicsView = PlotWidget(self.splitter_2)
+		self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 		self.gridLayout.addWidget(self.splitter_3, 0, 0, 1, 1)
 		MainWindow.setCentralWidget(self.centralwidget)
 		self.statusbar = QtGui.QStatusBar(MainWindow)
@@ -205,12 +207,14 @@ class Ui_MainWindow(object):
 		self.menubar.addAction(self.menuBG_Fill.menuAction())
 
 		self.graph_lst = [self.graphicsView, self.graphicsView_2, self.graphicsView_3, self.graphicsView_4, self.graphicsView_5, self.graphicsView_6, self.graphicsView_7, self.graphicsView_8]
-		self.actionSave.triggered.connect(self.save)
+		self.graph_lst.reverse()
 		self.actionFile.triggered.connect(self.open)
-
+		self.actionSave.triggered.connect(self.save)
+		
 		self.retranslateUi(MainWindow)
-		self.setSize()
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
+		self.restore()
+
 
 	def retranslateUi(self, MainWindow):
 		MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
@@ -278,7 +282,7 @@ class Ui_MainWindow(object):
 		width = self.splitter_2.height()/num
 		lst = []
 
-		for graph in self.graph_lst:
+		for graph in reversed(self.graph_lst):
 			if num > idx:
 				graph.show()
 				lst.append(width)
@@ -287,8 +291,20 @@ class Ui_MainWindow(object):
 				lst.append(0)
 			idx += 1
 
+		lst.reverse()
 		self.splitter_2.setSizes(lst)
 			
+	def open(self):
+		fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
+		name = fname.split("/") 
+		if name[len(name) -1] == 'synth.csv': 
+			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
+			lst = [] 
+ 
+			for val in rd.value: 
+			    lst += [val] 
+			
+			g = CustomGraph(lst, self.graphicsView)
 
 	def save(self):
 		main_setting = self.splitter_3.sizes()
@@ -304,14 +320,19 @@ class Ui_MainWindow(object):
 		f = open('setting', 'w+')
 		pickle.dump(settings, f)
 
-	def open(self):
-		f = open('setting', 'r')
-		settings = pickle.load(f)
-		self.splitter_3.setSizes(settings['main'])
-		self.splitter.setSizes(settings['control'])
-		self.graphWindow(settings['graph_num'])
-		self.splitter_2.setSizes(settings['graph'])
+	def restore(self):
+		try:
+			f = open('setting', 'r')
+			settings = pickle.load(f)
+			self.splitter_3.setSizes(settings['main'])
+			self.splitter.setSizes(settings['control'])
+			self.graphWindow(settings['graph_num'])
+			self.splitter_2.setSizes(settings['graph'])
+		
+		except IOError:
+			self.setSize()
 
+from pyqtgraph import PlotWidget
 from pyqtgraph.parametertree import ParameterTree
 
 if __name__ == "__main__":

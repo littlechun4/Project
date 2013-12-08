@@ -60,3 +60,9 @@ class CustomGraph(pg.GraphicsObject):
 
 	def updateRegion(self, region, connect_graph):
 		region.setRegion(connect_graph.getViewBox().viewRange()[0])
+
+	def restoreRegion(self, width_lst):
+		width_region_lst = zip(width_lst, self.region_lst)
+
+		for (width, region) in width_region_lst:
+			region.setRegion(width)

@@ -297,7 +297,8 @@ class Ui_MainWindow(object):
 	def open(self):
 		fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
 		name = fname.split("/") 
-		if name[len(name) -1] == 'synth.csv': 
+		self.file_name = name[len(name)-1]
+		if name[len(name)-1] == 'synth.csv': 
 			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
 			lst = [] 
  
@@ -305,8 +306,35 @@ class Ui_MainWindow(object):
 			    lst += [val] 
 			
 			self.graph = CustomGraph(lst, self.plotwidget_lst)
+		elif name[len(name)-1].split(".")[1] == "st":
+			f = open(name[len(name)-1], 'r')
+			settings = pickle.load(f)
+			f.close()
+			graph_file = './' + settings['file_name']
+			rd = pd.read_csv(str(graph_file), index_col=[0], header=None, names=['dt', 'value'])
+			lst = [] 
+			
+			for val in rd.value:
+				lst += [val]
+
+			self.graph = CustomGraph(lst, self.plotwidget_lst)
+			
+			self.graph.restoreRegion(settings['region_width'])
 			
 	def save(self):
+		fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/')
+		name = fname.split("/")
+		
+		region_width_lst = []
+		for region in self.graph.region_lst:
+			region_width_lst.append(region.getRegion())
+
+		settings = {'file_name': self.file_name, 'region_width': region_width_lst}
+
+		f = open(name[len(name)-1] + ".st", 'w+')
+		pickle.dump(settings, f)
+		f.close()
+
 		main_setting = self.splitter_3.sizes()
 		control_setting = self.splitter.sizes()
 		graph_setting = self.splitter_2.sizes()
@@ -319,6 +347,7 @@ class Ui_MainWindow(object):
 		settings = {'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
 		f = open('setting', 'w+')
 		pickle.dump(settings, f)
+		f.close()
 
 	def restore(self):
 		try:

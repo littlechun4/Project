@@ -212,10 +212,10 @@ class Ui_MainWindow(object):
 		self.actionSave.triggered.connect(self.save)
 		
 		#Scroll function connect
-		self.actionStart.triggered.connect(self.startScroll)
-		self.actionPause.triggered.connect(self.pauseScroll)
-		self.actionResume.triggered.connect(self.resumeScroll)
-		self.actionStop.triggered.connect(self.stopScroll)
+#		self.actionStart.triggered.connect(Window.startScroll)
+#		self.actionPause.triggered.connect(Window.pauseScroll)
+#		self.actionResume.triggered.connect(Window.resumeScroll)
+#		self.actionStop.triggered.connect(Window.stopScroll)
 
 		
 		self.retranslateUi(MainWindow)
@@ -367,6 +367,30 @@ class Ui_MainWindow(object):
 		except IOError:
 			self.setSize()
 
+
+
+
+class Window(QtGui.QMainWindow):
+	def __init__(self):
+		super(Window, self).__init__()
+		self.ui = Ui_MainWindow()
+		self.ui.setupUi(self)
+	
+	def	keyPressEvent(self, event):
+
+		print('hi!')
+		if (event.key()==QtCore.Qt.Key_Q):
+			self.startScroll()
+
+		elif(event.key()==QtCore.Qt.Key_W):
+			self.pauseScroll()
+
+		elif(event.key()==QtCore.Qt.Key_E):
+			self.resumeScroll()
+
+		elif(event.key()==QtCore.Qt.Key_R):
+			self.stopScroll()
+
 	timer = 0
 
 	def event(self):
@@ -400,30 +424,6 @@ class Ui_MainWindow(object):
 			del self.timer
 		except:
 			print('Error!')
-
-
-
-
-class Window(QtGui.QMainWindow):
-	def __init__(self):
-		super(Window, self).__init__()
-		self.ui = Ui_MainWindow()
-		self.ui.setupUi(self)
-	
-	def keyPressEvent(self, event):
-
-		print('hi!')
-		if (event.key()==QtCore.Qt.Key_Q):
-			self.startScroll()
-
-		elif(event.key()==QtCore.Qt.Key_W):
-			self.pauseScroll()
-
-		elif(event.key()==QtCore.Qt.Key_E):
-			self.resumeScroll()
-
-		elif(event.key()==QtCore.Qt.Key_R):
-			self.stopScroll()
 
 
 

@@ -211,6 +211,13 @@ class Ui_MainWindow(object):
 		self.actionFile.triggered.connect(self.open)
 		self.actionSave.triggered.connect(self.save)
 		
+		#Scroll function connect
+		self.actionStart.triggered.connect(self.startScroll)
+		self.actionPause.triggered.connect(self.pauseScroll)
+		self.actionResume.triggered.connect(self.resumeScroll)
+		self.actionStop.triggered.connect(self.stopScroll)
+
+		
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 		self.restore()

@@ -211,8 +211,13 @@ class Ui_MainWindow(object):
 		self.plotwidget_lst.reverse()
 		self.actionFile.triggered.connect(self.open)
 		self.actionSave.triggered.connect(self.save)
-		self.actionArrow_1.triggered.connect(self.insertArrow)
-		
+		self.actionArrow_1.triggered.connect(lambda: self.insertArrow(1))
+		self.actionArrow_2.triggered.connect(lambda: self.insertArrow(2))
+		self.actionArrow_3.triggered.connect(lambda: self.insertArrow(3))
+		self.actionArrow_4.triggered.connect(lambda: self.insertArrow(4))
+		self.actionArrow_5.triggered.connect(lambda: self.insertArrow(5))
+		self.actionArrow_6.triggered.connect(lambda: self.insertArrow(6))
+
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 		self.restore()
@@ -363,12 +368,24 @@ class Ui_MainWindow(object):
 		except IOError:
 			self.setSize()
 	
-	def insertArrow(self):
+	def insertArrow(self, arrow_type):
 		arrow_lst = []
 		for widget in self.plotwidget_lst:
-			arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, pen={'color':'w', 'width': 3})
+			if arrow_type == 1:
+				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			elif arrow_type == 2:
+				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			elif arrow_type == 3:
+				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			elif arrow_type == 4:
+				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+			elif arrow_type == 5:
+				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+			else:
+				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+
 			x1, x2 = self.plotwidget_lst[7].getViewBox().viewRange()[0]
-			arrow.setPos(int((x2-x1)/2), self.lst[int((x2-x1)/2)])
+			arrow.setPos(int((x2-x1)/2 + x1), self.lst[int((x2-x1)/2 + x1)])
 			widget.addItem(arrow)
 			arrow_lst.append(arrow)
 			

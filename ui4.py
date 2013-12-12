@@ -10,6 +10,7 @@
 from PyQt4 import QtCore, QtGui
 import pickle
 import pandas as pd
+import pyqtgraph as pg
 from CustomGraph import CustomGraph
 
 try:
@@ -210,6 +211,7 @@ class Ui_MainWindow(object):
 		self.plotwidget_lst.reverse()
 		self.actionFile.triggered.connect(self.open)
 		self.actionSave.triggered.connect(self.save)
+		self.actionArrow_1.triggered.connect(self.insertArrow)
 		
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -300,24 +302,24 @@ class Ui_MainWindow(object):
 		self.file_name = name[len(name)-1]
 		if name[len(name)-1] == 'synth.csv': 
 			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
-			lst = [] 
+			self.lst = [] 
  
 			for val in rd.value: 
-			    lst += [val] 
+			    self.lst += [val] 
 			
-			self.graph = CustomGraph(lst, self.plotwidget_lst)
+			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
 		elif name[len(name)-1].split(".")[1] == "st":
 			f = open(name[len(name)-1], 'r')
 			settings = pickle.load(f)
 			f.close()
 			graph_file = './' + settings['file_name']
 			rd = pd.read_csv(str(graph_file), index_col=[0], header=None, names=['dt', 'value'])
-			lst = [] 
+			self.lst = [] 
 			
 			for val in rd.value:
-				lst += [val]
+				self.lst += [val]
 
-			self.graph = CustomGraph(lst, self.plotwidget_lst)
+			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
 			
 			self.graph.restoreRegion(settings['region_width'])
 			
@@ -360,6 +362,17 @@ class Ui_MainWindow(object):
 		
 		except IOError:
 			self.setSize()
+	
+	def insertArrow(self):
+		arrow_lst = []
+		for widget in self.plotwidget_lst:
+			arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, pen={'color':'w', 'width': 3})
+			x1, x2 = self.plotwidget_lst[7].getViewBox().viewRange()[0]
+			arrow.setPos(int((x2-x1)/2), self.lst[int((x2-x1)/2)])
+			widget.addItem(arrow)
+			arrow_lst.append(arrow)
+			
+				
 
 from pyqtgraph import PlotWidget
 from pyqtgraph.parametertree import ParameterTree

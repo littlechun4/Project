@@ -4,6 +4,7 @@ import pyqtgraph as pg
 import pandas as pd
 import time
 import datetime
+from CustomGraph import CustomAxis
 
 rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value'])
 rd2 = pd.read_csv('./synth.csv', header=None, names=['dt', ''])
@@ -22,11 +23,12 @@ for dt in rd2.dt:
 for val in rd.value:
 	lst += [val]
 
-p1 = win.addPlot(title="Plot" , x = times, y = lst)
+axis = CustomAxis(orientation='bottom')
+p1 = win.addPlot(title="Plot", axisItems={'bottom': axis}, x = times, y = lst)
 lr = pg.LinearRegionItem([times[30000], times[70000]])
 lr.setZValue(-10)
 p1.addItem(lr)
-p2 = win.addPlot(title="Region")
+p2 = win.addPlot(title="Region", axisItems={'bottom': axis})
 p2.plot(x=times, y=lst)
 def updatePlot():
 	p2.setXRange(*lr.getRegion(), padding=0)

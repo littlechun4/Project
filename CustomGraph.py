@@ -1,4 +1,6 @@
 import pyqtgraph as pg
+import time
+import datetime
 from pyqtgraph import QtCore, QtGui
 
 class CustomGraph(pg.GraphicsObject):
@@ -66,3 +68,27 @@ class CustomGraph(pg.GraphicsObject):
 
 		for (width, region) in width_region_lst:
 			region.setRegion(width)
+
+class CustomAxis(pg.AxisItem):
+    def tickStrings(self, values, scale, spacing):
+        strns = []
+        rng = max(values)-min(values)
+        #if rng < 120:
+        #    return pg.AxisItem.tickStrings(self, values, scale, spacing)
+        if rng < 3600:
+			string = '%M:%S'
+        elif rng >= 3600 and rng < 3600*24:
+            string = '%H:%M:%S'
+        elif rng >= 3600*24 and rng < 3600*24*30:
+            string = '%d'
+        elif rng >= 3600*24*30 and rng < 3600*24*30*24:
+            string = '%m'
+        elif rng >=3600*24*30*24:
+            string = '%Y'
+        for x in values:
+            try:
+                strns.append(time.strftime(string, time.localtime(x)))
+            except ValueError:  ## Windows can't handle dates before 1970
+                strns.append('')
+                #self.setLabel(text=label)
+        return strns

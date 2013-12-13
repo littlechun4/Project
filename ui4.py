@@ -10,6 +10,8 @@
 from PyQt4 import QtCore, QtGui
 import pickle
 import pandas as pd
+import pyqtgraph as pg
+import pyqtgraph.parametertree.parameterTypes as pTypes
 from CustomGraph import CustomGraph
 
 try:
@@ -248,7 +250,14 @@ class Ui_MainWindow(object):
 		self.plotwidget_lst.reverse()
 		self.actionFile.triggered.connect(self.open)
 		self.actionSave.triggered.connect(self.save)
-		
+		self.actionArrow_1.triggered.connect(lambda: self.insertArrow(1))
+		self.actionArrow_2.triggered.connect(lambda: self.insertArrow(2))
+		self.actionArrow_3.triggered.connect(lambda: self.insertArrow(3))
+		self.actionArrow_4.triggered.connect(lambda: self.insertArrow(4))
+		self.actionArrow_5.triggered.connect(lambda: self.insertArrow(5))
+		self.actionArrow_6.triggered.connect(lambda: self.insertArrow(6))
+		self.actionRemove_All_2.triggered.connect(self.removeArrowAll)
+
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 		self.restore(MainWindow)
@@ -338,26 +347,32 @@ class Ui_MainWindow(object):
 		self.file_name = name[len(name)-1]
 		if name[len(name)-1] == 'synth.csv': 
 			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
-			lst = [] 
+			self.lst = [] 
  
 			for val in rd.value: 
-			    lst += [val] 
+			    self.lst += [val] 
 			
-			self.graph = CustomGraph(lst, self.plotwidget_lst)
+			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
+			self.arrowParameter = ArrowParameter(name='Arrow')
+			self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
+			self.treeWidget_2.setParameters(self.parameter, showTop=False)
+
 		elif name[len(name)-1].split(".")[1] == "st":
 			f = open(name[len(name)-1], 'r')
 			settings = pickle.load(f)
 			f.close()
 			graph_file = './' + settings['file_name']
 			rd = pd.read_csv(str(graph_file), index_col=[0], header=None, names=['dt', 'value'])
-			lst = [] 
+			self.lst = [] 
 			
 			for val in rd.value:
-				lst += [val]
+				self.lst += [val]
 
-			self.graph = CustomGraph(lst, self.plotwidget_lst)
+			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
 			
 			self.graph.restoreRegion(settings['region_width'])
+
+		self.arrow_lst = []
 			
 	def save(self):
 		fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/')
@@ -398,6 +413,54 @@ class Ui_MainWindow(object):
 		
 		except IOError:
 			self.setSize(MainWindow)
+		
+	def insertArrow(self, arrow_type):
+		arrow_lst = []
+		for widget in self.plotwidget_lst:
+			if arrow_type == 1:
+				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			elif arrow_type == 2:
+				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			elif arrow_type == 3:
+				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			elif arrow_type == 4:
+				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+			elif arrow_type == 5:
+				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+			else:
+				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+
+			x1, x2 = self.plotwidget_lst[7].getViewBox().viewRange()[0]
+			arrow.setPos(int((x2-x1)/2 + x1), self.lst[int((x2-x1)/2 + x1)])
+			widget.addItem(arrow)
+			arrow_lst.append(arrow)
+		
+		self.arrow_lst.append(arrow_lst)
+		self.arrowParameter.addArrow(int((x2-x1)/2 + x1), self.lst[int((x2-x1)/2 + x1)], arrow_type)
+
+	def removeArrowAll(self):
+		for arrow_lst in self.arrow_lst:
+			for (arrow, widget) in zip(arrow_lst, self.plotwidget_lst):
+				widget.removeItem(arrow)
+		
+		self.arrowParameter.removeArrowAll()
+				
+class ArrowParameter(pTypes.GroupParameter):
+	def __init__(self, **opts):
+		opts['type'] = 'group'
+		pTypes.GroupParameter.__init__(self, **opts)
+		self.num = 0
+ 
+	def addArrow(self, x_pos, y_pos, arrow_type):
+		self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
+			{'name': 'X-Position', 'type': 'float', 'value': x_pos},
+			{'name': 'Y-Position', 'type': 'float', 'value': y_pos},
+			{'name': 'Arrow Type', 'type': 'int', 'value': arrow_type}
+		]})
+		self.num += 1
+
+	def removeArrowAll(self):
+		self.clearChildren()
 
 class Window(QtGui.QMainWindow):
 	def __init__(self):
@@ -406,12 +469,11 @@ class Window(QtGui.QMainWindow):
 		self.ui.setupUi(self)
 
 	def keyPressEvent(self, event):
-
 		if (event.key() == QtCore.Qt.Key_4):
 			print 'hi'
 
 from pyqtgraph import PlotWidget
-from pyqtgraph.parametertree import ParameterTree
+from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
 
 if __name__ == "__main__":
 	import sys

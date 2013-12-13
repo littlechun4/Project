@@ -213,7 +213,7 @@ class Ui_MainWindow(object):
 		
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
-		self.restore()
+		self.restore(MainWindow)
 
 
 	def retranslateUi(self, MainWindow):
@@ -266,7 +266,7 @@ class Ui_MainWindow(object):
 		self.action7_2.setText(QtGui.QApplication.translate("MainWindow", "7", None, QtGui.QApplication.UnicodeUTF8))
 		self.action8_2.setText(QtGui.QApplication.translate("MainWindow", "8", None, QtGui.QApplication.UnicodeUTF8))
 
-	def setSize(self):
+	def setSize(self, MainWindow):
 		width = MainWindow.width()
 		self.splitter_3.setSizes([width/4, 3*width/4])
 		self.graphicsView_8.hide()
@@ -349,7 +349,7 @@ class Ui_MainWindow(object):
 		pickle.dump(settings, f)
 		f.close()
 
-	def restore(self):
+	def restore(self, MainWindow):
 		try:
 			f = open('setting', 'r')
 			settings = pickle.load(f)
@@ -359,7 +359,18 @@ class Ui_MainWindow(object):
 			self.splitter_2.setSizes(settings['graph'])
 		
 		except IOError:
-			self.setSize()
+			self.setSize(MainWindow)
+
+class Window(QtGui.QMainWindow):
+	def __init__(self):
+		super(Window, self).__init__()
+		self.ui = Ui_MainWindow()
+		self.ui.setupUi(self)
+
+	def keyPressEvent(self, event):
+
+		if (event.key() == QtCore.Qt.Key_4):
+			print 'hi'
 
 from pyqtgraph import PlotWidget
 from pyqtgraph.parametertree import ParameterTree
@@ -367,9 +378,7 @@ from pyqtgraph.parametertree import ParameterTree
 if __name__ == "__main__":
 	import sys
 	app = QtGui.QApplication(sys.argv)
-	MainWindow = QtGui.QMainWindow()
-	ui = Ui_MainWindow()
-	ui.setupUi(MainWindow)
+	MainWindow = Window()
 	MainWindow.show()
 	sys.exit(app.exec_())
 

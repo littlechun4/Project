@@ -5,19 +5,90 @@ import copy
 import pyqtgraph as pg
 from pyqtgraph import QtCore, QtGui
 
-class CustomGraph(pg.GraphicsObject):
-	def __init__(self, data, widget_lst):
+#정렬된 타임스탬프의 레인지를 입력받아 그 인덱스의 레인지를 출력해주는 코드
+def getListRange(start, end, lst):
+
+	m = 0
+	n = len(lst)-1
+
+	while (m <= n):
+		
+		if(lst[m] == start):
+			s = m
+			break
+		elif(lst[n] == start):
+			s = n
+			break
+
+		if (m+1 == n):
+			s = m
+			break
+
+		l = int((m+n)/2)
+		if(lst[l] > start):
+			n = l
+		elif(lst[l] < start):
+			m = l
+		else:
+			s = l
+			break
+
+	m = 0
+	n = len(lst)-1
+
+	while (m <= n):
+
+		if(lst[n] == end):
+			e = n
+			break
+		elif(lst[m] == end):
+			e = m
+			break
+		
+		if(m+1 == n):
+			e = n
+			break
+
+		l = int((m+n)/2)
+		if(lst[l] > end):
+			n = l
+		elif(lst[l] < end):
+			m = l
+		else:
+			e = l
+			break
+
+	return [s, e]
+
+class CustomGraph(pg.GraphicsObject):		
+
+	def __init__(self, data, widget_lst, times):
+
+		#save data, stamp
+		self.data = data
+		self.times = times
 
 		#recursive update에 사용됨
 		self.pre_empt = 0
 
+		#y's autorage level
+		self.autorange = 1
+
 		pg.GraphicsObject.__init__(self)
 		self.region_lst = []
 		self.old_region_lst = []
+		self.y_min = []
+		self.y_max = []
 		for i in reversed(range(len(widget_lst))):
 			if (i != 7):
-				widget_lst[i].plot(y=data)
+				widget_lst[i].plot(x=times, y=data)
 				widget_lst[i].setXRange(*self.region_lst[6-i].getRegion(), padding=0)
+
+				lst_range = getListRange(widget_lst[i].getViewBox().viewRange()[0][0], widget_lst[i].getViewBox().viewRange()[0][1], times)
+				new_data = data[lst_range[0]:lst_range[1]+1]
+				self.y_min += [min(new_data)]
+				self.y_max += [max(new_data)]
+				widget_lst[i].setYRange(min(new_data), max(new_data), padding=0)
 
 				g_start = widget_lst[i].getViewBox().viewRange()[0][0]
 				g_end = widget_lst[i].getViewBox().viewRange()[0][1]
@@ -29,8 +100,16 @@ class CustomGraph(pg.GraphicsObject):
 				self.old_region_lst+=[[region.getRegion()[0], region.getRegion()[1]]]
 
 			else:
-				widget_lst[i].plot(y=data)
-				region = pg.LinearRegionItem([2*len(data)/5, 3*len(data)/5])
+
+				widget_lst[i].plot(x=times, y=data)
+				widget_lst[i].setXRange(times[0], times[len(times)-1], padding = 0)
+				#widget_lst[i].setAutoPan(y=True)
+				widget_lst[i].getViewBox().enableAutoRange(axis=widget_lst[i].getViewBox().YAxis, enable=self.autorange)
+				self.y_min += [0]
+				self.y_max += [0]
+
+				time_interval = times[len(times)-1] - times[0]
+				region = pg.LinearRegionItem([times[0] + 2*time_interval/5, times[0] + 3*time_interval/5])
 				region.setZValue(-10)
 				widget_lst[i].addItem(region)
 				self.region_lst.append(region)
@@ -103,9 +182,32 @@ class CustomGraph(pg.GraphicsObject):
 			self.old_region_lst[level][0] = cur_region[0]
 			self.old_region_lst[level][1] = cur_region[1]
 
-			#다음 그래프와 레인지와 리젼을 바꾼다.
+			#다음 그래프와 X,Y레인지와 리젼을 바꾼다.
 			if (next_level != 7):
+				#cur_xrange = [widget_lst[next_level].getViewBox().viewRange[0][0], widget_lst[next_level].getViewBox().viewRange[0][0]]
+				#X레인지 변환
 				widget_lst[next_level].setXRange(*self.region_lst[level].getRegion(), padding=0)
+				new_xrange = [widget_lst[next_level].getViewBox().viewRange()[0][0], widget_lst[next_level].getViewBox().viewRange()[0][1]]
+				#Y레인지 변환
+				
+				#min, max값이 바뀌었는지에 대한 flag
+				#flag = True
+				
+				#현재 X범위와 새로운 X범위가 겹침
+				#if(cur_xrange[1] > new_xrange[0]):
+				#	lst_range = getListRange(cur_xrange[1], new_xrange[1], self.times
+				#	lst_range = getListRange(new_xrage[0], new_xrange[1], self.times)
+			
+				#now_min = widget_lst[next_level].getViewBox().
+				
+				lst_range = getListRange(new_xrange[0], new_xrange[1], self.times)
+				new_data = self.data[lst_range[0]:lst_range[1]+1]
+
+				self.y_min = min(new_data)
+				self.y_max = max(new_data)
+
+				widget_lst[next_level].setYRange(self.y_min, self.y_max, padding=0, update=True)
+
 			self.region_lst[next_level].setRegion(next_region)
 
 		#lock off

@@ -12,7 +12,8 @@ import pickle
 import pandas as pd
 import pyqtgraph as pg
 import pyqtgraph.parametertree.parameterTypes as pTypes
-from CustomGraph import CustomGraph
+from CustomGraph import CustomGraph, CustomAxis
+import time
 
 try:
 	_fromUtf8 = QtCore.QString.fromUtf8
@@ -21,6 +22,7 @@ except AttributeError:
 
 class Ui_MainWindow(object):
 	def setupUi(self, MainWindow):
+
 		MainWindow.setObjectName(_fromUtf8("MainWindow"))
 		MainWindow.resize(844, 833)
 		self.centralwidget = QtGui.QWidget(MainWindow)
@@ -41,21 +43,21 @@ class Ui_MainWindow(object):
 		self.splitter_2 = QtGui.QSplitter(self.splitter_3)
 		self.splitter_2.setOrientation(QtCore.Qt.Vertical)
 		self.splitter_2.setObjectName(_fromUtf8("splitter_2"))
-		self.graphicsView_8 = PlotWidget(self.splitter_2)
+		self.graphicsView_8 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_8.setObjectName(_fromUtf8("graphicsView_8"))
-		self.graphicsView_7 = PlotWidget(self.splitter_2)
+		self.graphicsView_7 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_7.setObjectName(_fromUtf8("graphicsView_7"))
-		self.graphicsView_6 = PlotWidget(self.splitter_2)
+		self.graphicsView_6 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_6.setObjectName(_fromUtf8("graphicsView_6"))
-		self.graphicsView_5 = PlotWidget(self.splitter_2)
+		self.graphicsView_5 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_5.setObjectName(_fromUtf8("graphicsView_5"))
-		self.graphicsView_4 = PlotWidget(self.splitter_2)
+		self.graphicsView_4 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_4.setObjectName(_fromUtf8("graphicsView_4"))
-		self.graphicsView_3 = PlotWidget(self.splitter_2)
+		self.graphicsView_3 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_3.setObjectName(_fromUtf8("graphicsView_3"))
-		self.graphicsView_2 = PlotWidget(self.splitter_2)
+		self.graphicsView_2 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_2.setObjectName(_fromUtf8("graphicsView_2"))
-		self.graphicsView = PlotWidget(self.splitter_2)
+		self.graphicsView = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 		self.gridLayout.addWidget(self.splitter_3, 0, 0, 1, 1)
 		MainWindow.setCentralWidget(self.centralwidget)
@@ -264,6 +266,13 @@ class Ui_MainWindow(object):
 		self.actionArrow_6.triggered.connect(lambda: self.insertArrow(6))
 		self.actionRemove_All_2.triggered.connect(self.removeArrowAll)
 
+		#Scroll function connect
+		self.actionStart.triggered.connect(self.startScroll)
+		self.actionPause.triggered.connect(self.pauseScroll)
+		self.actionResume.triggered.connect(self.resumeScroll)
+		self.actionStop.triggered.connect(self.stopScroll)
+
+		
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 		self.restore(MainWindow)
@@ -354,32 +363,61 @@ class Ui_MainWindow(object):
 		self.file_name = name[len(name)-1]
 
 		if name[len(name)-1] == 'synth.csv': 
-			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
+			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value'])
+			rd2 = pd.read_csv('./synth.csv', header=None, names=['dt', ''])
+
+			self.times = []
 			self.lst = [] 
- 
+
+			"""
+			시간 정보를 받아서 timestamp 형태로 변환
+			"""
+			for dt in rd2.dt:
+				stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S'))
+				self.times += [stamp]
+
+			"""
+			depth 정보를 리스트에 저장함.
+			"""
 			for val in rd.value: 
 			    self.lst += [val] 
 			
-			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
+			"""
+			parameter를 초기화하고 widget에 추가해 줌.
+			"""
 			self.arrowParameter = ArrowParameter(name='Arrow')
 			self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
 			self.treeWidget_2.setParameters(self.parameter, showTop=False)
+
+			self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
 
 		elif name[len(name)-1].split(".")[1] == "st":
 			f = open(name[len(name)-1], 'r')
 			settings = pickle.load(f)
 			f.close()
 			graph_file = './' + settings['file_name']
-			rd = pd.read_csv(str(graph_file), index_col=[0], header=None, names=['dt', 'value'])
+			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value'])
+			rd2 = pd.read_csv('./synth.csv', header=None, names=['dt', ''])
+
+			self.times = []
 			self.lst = [] 
-			
-			for val in rd.value:
-				self.lst += [val]
 
-			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
+			for dt in rd2.dt:
+				stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S'))
+				self.times += [stamp]
+ 
+			for val in rd.value: 
+			    self.lst += [val] 
 			
-			self.graph.restoreRegion(settings['region_width'])
+			self.arrowParameter = ArrowParameter(name='Arrow')
+			self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
+			self.treeWidget_2.setParameters(self.parameter, showTop=False)
 
+			self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
+
+		"""
+		화살표 리스트 초기화
+		"""
 		self.arrow_lst = []
 			
 	def save(self):						# 저장해야 될 정보를 저장하는 함수. pickle을 이용해서 저장한다.
@@ -405,7 +443,6 @@ class Ui_MainWindow(object):
 		for graph in graph_setting:
 			if graph != 0:
 				graph_num += 1
-
 		settings = {'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
 		f = open('setting', 'w+')
 		pickle.dump(settings, f)
@@ -464,7 +501,40 @@ class Ui_MainWindow(object):
 
 		self.arrow_lst = []
 		self.arrowParameter.removeArrowAll()
-				
+	
+	timer = 0
+
+	def event(self):
+		cont = self.graph.scroll(self.plotwidget_lst[6], 2, 1)
+		if cont == False:
+			print('Out of Bonud!')
+			self.timer.stop()
+
+	def startScroll(self):
+		try:
+			self.timer = QtCore.QTimer()
+			self.timer.timeout.connect(self.event)
+			self.timer.start(250)
+		except:
+			print('Error!')
+
+	def pauseScroll(self):
+		try:
+			self.timer.stop()
+		except:
+			print('Error!')
+
+	def resumeScroll(self):
+		try:
+			self.timer.start(250)
+		except:
+			print('Error!')
+
+	def stopScroll(self):
+		try:
+			del self.timer
+		except:
+			print('Error!')		
 
 class ArrowParameter(pTypes.GroupParameter):
 	""" 
@@ -497,10 +567,34 @@ class Window(QtGui.QMainWindow):
 		super(Window, self).__init__()
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
-
+	
 	def keyPressEvent(self, event):
-		if (event.key() == QtCore.Qt.Key_4):
-			print 'hi'
+		print('hi!')
+		if (event.key()==QtCore.Qt.Key_Q):
+			self.ui.startScroll()
+
+		elif(event.key()==QtCore.Qt.Key_W):
+			self.ui.pauseScroll()
+
+		elif(event.key()==QtCore.Qt.Key_E):
+			self.ui.resumeScroll()
+
+		elif(event.key()==QtCore.Qt.Key_R):
+			self.ui.stopScroll()
+
+		# Arrow Mapping Keys
+		elif(event.key()==QtCore.Qt.Key_4):
+			self.ui.insertArrow(1)
+		elif(event.key()==QtCore.Qt.Key_5):
+			self.ui.insertArrow(2)
+		elif(event.key()==QtCore.Qt.Key_6):
+			self.ui.insertArrow(3)
+		elif(event.key()==QtCore.Qt.Key_7):
+			self.ui.insertArrow(4)
+		elif(event.key()==QtCore.Qt.Key_8):
+			self.ui.insertArrow(5)
+		elif(event.key()==QtCore.Qt.Key_9):
+			self.ui.insertArrow(6)
 
 from pyqtgraph import PlotWidget
 from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType

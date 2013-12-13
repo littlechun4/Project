@@ -245,11 +245,17 @@ class Ui_MainWindow(object):
 		self.toolBar_4.addAction(self.actionM)
 		self.toolBar_4.addAction(self.actionRemove_All)
 
-
+		"""
+		self.plotwidget_lst = 그래프를 위에서부터 넣은 리스트
+		"""
 		self.plotwidget_lst = [self.graphicsView, self.graphicsView_2, self.graphicsView_3, self.graphicsView_4, self.graphicsView_5, self.graphicsView_6, self.graphicsView_7, self.graphicsView_8]
 		self.plotwidget_lst.reverse()
 		self.actionFile.triggered.connect(self.open)
 		self.actionSave.triggered.connect(self.save)
+
+		"""
+		화살표 액션 연결 코드
+		"""
 		self.actionArrow_1.triggered.connect(lambda: self.insertArrow(1))
 		self.actionArrow_2.triggered.connect(lambda: self.insertArrow(2))
 		self.actionArrow_3.triggered.connect(lambda: self.insertArrow(3))
@@ -313,7 +319,8 @@ class Ui_MainWindow(object):
 		self.action7_2.setText(QtGui.QApplication.translate("MainWindow", "7", None, QtGui.QApplication.UnicodeUTF8))
 		self.action8_2.setText(QtGui.QApplication.translate("MainWindow", "8", None, QtGui.QApplication.UnicodeUTF8))
 
-	def setSize(self, MainWindow):
+
+	def setSize(self, MainWindow):			# 저장된 설정 파일이 없을 때 최초로 ui 크기를 설정해 주는 함수
 		width = MainWindow.width()
 		self.splitter_3.setSizes([width/4, 3*width/4])
 		self.graphicsView_8.hide()
@@ -324,7 +331,7 @@ class Ui_MainWindow(object):
 		self.graphicsView_3.hide()
 		self.graphicsView_2.hide()
 
-	def graphWindow(self, num):
+	def graphWindow(self, num):				# 인자로 받는 num의 수만큼 그래프를 표시해주고 크기도 균등하게 나눔.
 		idx = 0
 		width = self.splitter_2.height()/num
 		lst = []
@@ -341,10 +348,11 @@ class Ui_MainWindow(object):
 		lst.reverse()
 		self.splitter_2.setSizes(lst)
 			
-	def open(self):
+	def open(self):							# 파일을 여는 함수. 확장자가 .csv이면 최초로 여는 것이고 .st이면 저장된 세팅을 불러와서 연다.
 		fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
 		name = fname.split("/") 
 		self.file_name = name[len(name)-1]
+
 		if name[len(name)-1] == 'synth.csv': 
 			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
 			self.lst = [] 
@@ -374,16 +382,17 @@ class Ui_MainWindow(object):
 
 		self.arrow_lst = []
 			
-	def save(self):
+	def save(self):						# 저장해야 될 정보를 저장하는 함수. pickle을 이용해서 저장한다.
 		fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/')
 		name = fname.split("/")
 		
-		region_width_lst = []
+		region_width_lst = []			# 파일 이름 및 Region 저장
 		for region in self.graph.region_lst:
 			region_width_lst.append(region.getRegion())
 
 		settings = {'file_name': self.file_name, 'region_width': region_width_lst}
 
+		# 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
 		f = open(name[len(name)-1] + ".st", 'w+')
 		pickle.dump(settings, f)
 		f.close()
@@ -402,6 +411,7 @@ class Ui_MainWindow(object):
 		pickle.dump(settings, f)
 		f.close()
 
+	#최초에 프로그램을 열 때 호출되는 함수로, 저장된 layout설정 파일이 있으면 파일을 열어서 설정을 복구한다.
 	def restore(self, MainWindow):
 		try:
 			f = open('setting', 'r')
@@ -413,7 +423,13 @@ class Ui_MainWindow(object):
 		
 		except IOError:
 			self.setSize(MainWindow)
-		
+
+	"""
+	화살표 삽입 함수. 화살표 종류를 int 인자로 받아서 타입에 맞춰 적절한 화살표를 삽입한다.
+	가장 아래쪽에 있는 그래프의 가운데에 삽입하도록 되어있다. 각 graph widget에 삽입한 화살표를 리스트로 만들고
+	그 리스트를 다시 self.arrow_lst라는 리스트에 추가한다.
+	마지막으로 이 화살표에 해당하는 parameter를 추가한다.
+	"""
 	def insertArrow(self, arrow_type):
 		arrow_lst = []
 		for widget in self.plotwidget_lst:
@@ -438,19 +454,32 @@ class Ui_MainWindow(object):
 		self.arrow_lst.append(arrow_lst)
 		self.arrowParameter.addArrow(int((x2-x1)/2 + x1), self.lst[int((x2-x1)/2 + x1)], arrow_type)
 
+	"""
+	모든 화살표를 제거한다. parameter도 함께 제거함.
+	"""
 	def removeArrowAll(self):
 		for arrow_lst in self.arrow_lst:
 			for (arrow, widget) in zip(arrow_lst, self.plotwidget_lst):
 				widget.removeItem(arrow)
-		
+
+		self.arrow_lst = []
 		self.arrowParameter.removeArrowAll()
 				
+
 class ArrowParameter(pTypes.GroupParameter):
+	""" 
+	화살표를 위한 별도의 parameter 클래스이다.
+	최초에 num을 저장해서 화살표가 구분 표시를 위해 사용하며
+	화살표 추가와 화살표 전부 삭제 기능을 제공한다.
+	"""
 	def __init__(self, **opts):
 		opts['type'] = 'group'
 		pTypes.GroupParameter.__init__(self, **opts)
 		self.num = 0
  
+	"""
+	화살표 추가의 경우 인자로 x, y, type을 받아서 각각의 정보를 arrow + number의 group아래 띄워준다.
+	"""
 	def addArrow(self, x_pos, y_pos, arrow_type):
 		self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
 			{'name': 'X-Position', 'type': 'float', 'value': x_pos},
@@ -459,6 +488,7 @@ class ArrowParameter(pTypes.GroupParameter):
 		]})
 		self.num += 1
 
+	# 화살표 parameter를 모두 지움.
 	def removeArrowAll(self):
 		self.clearChildren()
 

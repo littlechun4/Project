@@ -11,6 +11,7 @@ from PyQt4 import QtCore, QtGui
 import pickle
 import pandas as pd
 import pyqtgraph as pg
+import pyqtgraph.parametertree.parameterTypes as pTypes
 from CustomGraph import CustomGraph
 
 try:
@@ -314,6 +315,9 @@ class Ui_MainWindow(object):
 			    self.lst += [val] 
 			
 			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
+			self.arrowParameter = ArrowParameter(name='Arrow')
+			self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
+			self.treeWidget_2.setParameters(self.parameter, showTop=False)
 
 		elif name[len(name)-1].split(".")[1] == "st":
 			f = open(name[len(name)-1], 'r')
@@ -394,15 +398,33 @@ class Ui_MainWindow(object):
 			arrow_lst.append(arrow)
 		
 		self.arrow_lst.append(arrow_lst)
+		self.arrowParameter.addArrow(int((x2-x1)/2 + x1), arrow_type)
 
 	def removeArrowAll(self):
 		for arrow_lst in self.arrow_lst:
 			for (arrow, widget) in zip(arrow_lst, self.plotwidget_lst):
 				widget.removeItem(arrow)
+		
+		self.arrowParameter.removeArrowAll()
 				
+class ArrowParameter(pTypes.GroupParameter):
+	def __init__(self, **opts):
+		opts['type'] = 'group'
+		pTypes.GroupParameter.__init__(self, **opts)
+		self.num = 0
+ 
+	def addArrow(self, x_pos, arrow_type):
+		self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
+			{'name': 'Position', 'type': 'float', 'value': x_pos},
+			{'name': 'Arrow Type', 'type': 'int', 'value': arrow_type}
+		]})
+		self.num += 1
+
+	def removeArrowAll(self):
+		self.clearChildren()
 
 from pyqtgraph import PlotWidget
-from pyqtgraph.parametertree import ParameterTree
+from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
 
 if __name__ == "__main__":
 	import sys

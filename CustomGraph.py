@@ -2,12 +2,12 @@ import pyqtgraph as pg
 from pyqtgraph import QtCore, QtGui
 
 class CustomGraph(pg.GraphicsObject):
-	def __init__(self, data, widget_lst):
+	def __init__(self, times, data, widget_lst):
 		pg.GraphicsObject.__init__(self)
 		self.region_lst = []
 		for i in reversed(range(len(widget_lst))):
 			if (i != 0 and i != 7):
-				widget_lst[i].plot(y=data)
+				widget_lst[i].plot(x=times, y=data)
 				widget_lst[i].setXRange(*self.region_lst[6-i].getRegion(), padding=0)
 
 				g_start = widget_lst[i].getViewBox().viewRange()[0][0]
@@ -19,14 +19,14 @@ class CustomGraph(pg.GraphicsObject):
 				self.region_lst.append(region)
 
 			elif (i == 7):
-				widget_lst[i].plot(y=data)
-				region = pg.LinearRegionItem([2*len(data)/5, 3*len(data)/5])
+				widget_lst[i].plot(x=times, y=data)
+				region = pg.LinearRegionItem([times[2*len(times)/5], times[3*len(times)/5]])
 				region.setZValue(-10)
 				widget_lst[i].addItem(region)
 				self.region_lst.append(region)
 
 			else:
-				widget_lst[i].plot(y=data)
+				widget_lst[i].plot(x=times, y=data)
 				widget_lst[i].setXRange(*self.region_lst[6-i].getRegion(), padding=0)
 			
 		self.region_lst.reverse()

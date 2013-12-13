@@ -9,6 +9,8 @@
 
 from PyQt4 import QtCore, QtGui
 import pickle
+import time
+import datetime
 import pandas as pd
 from CustomGraph import CustomGraph
 
@@ -300,24 +302,39 @@ class Ui_MainWindow(object):
 		self.file_name = name[len(name)-1]
 		if name[len(name)-1] == 'synth.csv': 
 			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value']) 
+			rd2 = pd.read_csv('./synth.csv', header=None, names=['dt', ''])
+		
+			times = []
 			lst = [] 
- 
+ 	
+			for dt in rd2.dt:
+				stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S'))
+				times += [stamp]
+
 			for val in rd.value: 
 			    lst += [val] 
 			
-			self.graph = CustomGraph(lst, self.plotwidget_lst)
+			self.graph = CustomGraph(times, lst, self.plotwidget_lst)
+
 		elif name[len(name)-1].split(".")[1] == "st":
 			f = open(name[len(name)-1], 'r')
 			settings = pickle.load(f)
 			f.close()
 			graph_file = './' + settings['file_name']
 			rd = pd.read_csv(str(graph_file), index_col=[0], header=None, names=['dt', 'value'])
+			rd2 = pd.read_csv('./synth.csv', header=None, names=['dt', ''])
+		
+			times = []
 			lst = [] 
-			
+ 	
+			for dt in rd2.dt:
+				stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S'))
+				times += [stamp]
+
 			for val in rd.value:
 				lst += [val]
 
-			self.graph = CustomGraph(lst, self.plotwidget_lst)
+			self.graph = CustomGraph(times, lst, self.plotwidget_lst)
 			
 			self.graph.restoreRegion(settings['region_width'])
 			

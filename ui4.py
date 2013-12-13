@@ -414,16 +414,30 @@ class Window(QtGui.QMainWindow):
 
 		print('hi!')
 		if (event.key()==QtCore.Qt.Key_Q):
-			self.startScroll()
+			self.ui.startScroll()
 
 		elif(event.key()==QtCore.Qt.Key_W):
-			self.pauseScroll()
+			self.ui.pauseScroll()
 
 		elif(event.key()==QtCore.Qt.Key_E):
-			self.resumeScroll()
+			self.ui.resumeScroll()
 
 		elif(event.key()==QtCore.Qt.Key_R):
-			self.stopScroll()
+			self.ui.stopScroll()
+
+		# Arrow Mapping Keys - Insert your code Here!
+		elif(event.key()==QtCore.Qt.Key_4):
+			print('arrow 4!')
+		elif(event.key()==QtCore.Qt.Key_5):
+			print('arrow 5!')
+		elif(event.key()==QtCore.Qt.Key_6):
+			print('arrow 6!')
+		elif(event.key()==QtCore.Qt.Key_7):
+			print('arrow 7!')
+		elif(event.key()==QtCore.Qt.Key_8):
+			print('arrow 8!')
+		elif(event.key()==QtCore.Qt.Key_9):
+			print('arrow 9!')
 
 
 

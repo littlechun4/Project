@@ -10,7 +10,7 @@
 from PyQt4 import QtCore, QtGui
 import pickle
 import pandas as pd
-from CustomGraph import CustomGraph
+from CustomGraph import CustomGraph, CustomAxis
 import time
 
 try:
@@ -20,6 +20,7 @@ except AttributeError:
 
 class Ui_MainWindow(object):
 	def setupUi(self, MainWindow):
+
 		MainWindow.setObjectName(_fromUtf8("MainWindow"))
 		MainWindow.resize(844, 833)
 		self.centralwidget = QtGui.QWidget(MainWindow)
@@ -40,21 +41,21 @@ class Ui_MainWindow(object):
 		self.splitter_2 = QtGui.QSplitter(self.splitter_3)
 		self.splitter_2.setOrientation(QtCore.Qt.Vertical)
 		self.splitter_2.setObjectName(_fromUtf8("splitter_2"))
-		self.graphicsView_8 = PlotWidget(self.splitter_2)
+		self.graphicsView_8 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_8.setObjectName(_fromUtf8("graphicsView_8"))
-		self.graphicsView_7 = PlotWidget(self.splitter_2)
+		self.graphicsView_7 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_7.setObjectName(_fromUtf8("graphicsView_7"))
-		self.graphicsView_6 = PlotWidget(self.splitter_2)
+		self.graphicsView_6 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_6.setObjectName(_fromUtf8("graphicsView_6"))
-		self.graphicsView_5 = PlotWidget(self.splitter_2)
+		self.graphicsView_5 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_5.setObjectName(_fromUtf8("graphicsView_5"))
-		self.graphicsView_4 = PlotWidget(self.splitter_2)
+		self.graphicsView_4 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_4.setObjectName(_fromUtf8("graphicsView_4"))
-		self.graphicsView_3 = PlotWidget(self.splitter_2)
+		self.graphicsView_3 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_3.setObjectName(_fromUtf8("graphicsView_3"))
-		self.graphicsView_2 = PlotWidget(self.splitter_2)
+		self.graphicsView_2 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView_2.setObjectName(_fromUtf8("graphicsView_2"))
-		self.graphicsView = PlotWidget(self.splitter_2)
+		self.graphicsView = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
 		self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 		self.gridLayout.addWidget(self.splitter_3, 0, 0, 1, 1)
 		MainWindow.setCentralWidget(self.centralwidget)

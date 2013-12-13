@@ -217,6 +217,7 @@ class Ui_MainWindow(object):
 		self.actionArrow_4.triggered.connect(lambda: self.insertArrow(4))
 		self.actionArrow_5.triggered.connect(lambda: self.insertArrow(5))
 		self.actionArrow_6.triggered.connect(lambda: self.insertArrow(6))
+		self.actionRemove_All_2.triggered.connect(self.removeArrowAll)
 
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -313,6 +314,7 @@ class Ui_MainWindow(object):
 			    self.lst += [val] 
 			
 			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
+
 		elif name[len(name)-1].split(".")[1] == "st":
 			f = open(name[len(name)-1], 'r')
 			settings = pickle.load(f)
@@ -327,6 +329,8 @@ class Ui_MainWindow(object):
 			self.graph = CustomGraph(self.lst, self.plotwidget_lst)
 			
 			self.graph.restoreRegion(settings['region_width'])
+
+		self.arrow_lst = []
 			
 	def save(self):
 		fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/')
@@ -388,7 +392,13 @@ class Ui_MainWindow(object):
 			arrow.setPos(int((x2-x1)/2 + x1), self.lst[int((x2-x1)/2 + x1)])
 			widget.addItem(arrow)
 			arrow_lst.append(arrow)
-			
+		
+		self.arrow_lst.append(arrow_lst)
+
+	def removeArrowAll(self):
+		for arrow_lst in self.arrow_lst:
+			for (arrow, widget) in zip(arrow_lst, self.plotwidget_lst):
+				widget.removeItem(arrow)
 				
 
 from pyqtgraph import PlotWidget

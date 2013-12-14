@@ -230,14 +230,12 @@ class CustomGraph(pg.GraphicsObject):
     # operace once per 50ms
     # level = 1 ~ 8
 
-    def scroll(self, widget, level, degree):
+    def scroll(self, widget, level, vel):
 
-        runthrough_time = [5, 10, 20]
-        vel = runthrough_time[degree]
         g_start = widget.getViewBox().viewRange()[0][0]
         g_end = widget.getViewBox().viewRange()[0][1]
 
-        one_step = ((g_end - g_start) / vel) * 0.05
+        one_step = vel
         #print(one_step)
 
         new_region = [self.region_lst[8-level].getRegion()[0] + one_step, self.region_lst[8-level].getRegion()[1] + one_step]

@@ -17,6 +17,8 @@ from bisect import bisect_right
 import time
 from datetime import datetime
 import BG_Popup
+from pyqtgraph import PlotWidget
+from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
 
 try:
 	_fromUtf8 = QtCore.QString.fromUtf8
@@ -38,9 +40,9 @@ class Ui_MainWindow(object):
 		self.splitter = QtGui.QSplitter(self.splitter_3)
 		self.splitter.setOrientation(QtCore.Qt.Vertical)
 		self.splitter.setObjectName(_fromUtf8("splitter"))
-		self.treeWidget = ParameterTree(self.splitter)
+		self.treeWidget = MyTreeWidget(self.splitter)
 		self.treeWidget.setObjectName(_fromUtf8("treeWidget"))
-		self.treeWidget_2 = ParameterTree(self.splitter)
+		self.treeWidget_2 = MyTreeWidget(self.splitter)
 		self.treeWidget_2.setObjectName(_fromUtf8("treeWidget_2"))
 		self.splitter_2 = QtGui.QSplitter(self.splitter_3)
 		self.splitter_2.setOrientation(QtCore.Qt.Vertical)
@@ -296,6 +298,11 @@ class Ui_MainWindow(object):
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 		self.restore(MainWindow)
 
+		"""
+	
+		"""
+		self.treeWidget.setMainWindow(self)
+		self.treeWidget_2.setMainWindow(self)
 
 	def retranslateUi(self, MainWindow):
 		MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
@@ -347,7 +354,6 @@ class Ui_MainWindow(object):
 		self.action7_2.setText(QtGui.QApplication.translate("MainWindow", "7", None, QtGui.QApplication.UnicodeUTF8))
 		self.action8_2.setText(QtGui.QApplication.translate("MainWindow", "8", None, QtGui.QApplication.UnicodeUTF8))
 		self.actionBG_Fill.setText(QtGui.QApplication.translate("MainWindow", "BG_Fill", None, QtGui.QApplication.UnicodeUTF8))
-
 
 
 	def setSize(self, MainWindow):			# 저장된 설정 파일이 없을 때 최초로 ui 크기를 설정해 주는 함수
@@ -408,7 +414,7 @@ class Ui_MainWindow(object):
 			depth 정보를 리스트에 저장함.
 			"""
 			for val in rd.value: 
-			    self.lst += [val] 
+				self.lst += [val] 
 			
 			"""
 			parameter를 초기화하고 widget에 추가해 줌.
@@ -451,7 +457,7 @@ class Ui_MainWindow(object):
 				self.times += [stamp]
 
 			for val in rd.value: 
-			    self.lst += [val] 
+				self.lst += [val] 
 
 			#화살표 리스트 초기화
 			self.arrow_lst = []
@@ -628,6 +634,24 @@ class Ui_MainWindow(object):
 		self.arrowParameter.restoreArrow(datetime.fromtimestamp(x/1000).strftime('%y-%m-%d %H:%M:%S'), y, num, arrow_type)
 		self.arrow_setting_lst.append({'x': x, 'y': y, 'num': num, 'type': arrow_type})
 
+
+	def removeArrow(self, item):
+		arrow_num = int(item.text(0).split("Arrow")[1])
+		
+		i = 0
+		for arrow_setting in self.arrow_setting_lst:
+			if arrow_setting['num'] == arrow_num:
+				d = arrow_setting
+				break
+			i += 1
+
+		for (arrow, widget) in zip(self.arrow_lst[i], self.plotwidget_lst):
+			widget.removeItem(arrow)
+		
+		
+		self.arrow_setting_lst.remove(d)
+		self.arrowParameter.removeArrow(item.text(0))
+			
 	"""
 	모든 화살표를 제거한다. parameter도 함께 제거함.
 	"""
@@ -689,6 +713,7 @@ class ArrowParameter(pTypes.GroupParameter):
 	화살표 추가와 화살표 전부 삭제 기능을 제공한다.
 	"""
 	def __init__(self, **opts):
+		#super(ArrowParameter, self).__init__()
 		opts['type'] = 'group'
 		pTypes.GroupParameter.__init__(self, **opts)
 		self.num = 0
@@ -701,7 +726,7 @@ class ArrowParameter(pTypes.GroupParameter):
 		self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
 			{'name': 'X-Position', 'type': 'str', 'value': x_pos},
 			{'name': 'Y-Position', 'type': 'int', 'value': y_pos},
-			{'name': 'Arrow Type', 'type': 'int', 'value': arrow_type}
+			{'name': 'Type', 'type': 'int', 'value': arrow_type}
 		]})
 		self.num += 1
 		return self.num - 1
@@ -710,14 +735,63 @@ class ArrowParameter(pTypes.GroupParameter):
 		self.addChild({'name': 'Arrow' + str(num), 'type': 'group', 'children': [
 			{'name': 'X-Position', 'type': 'str', 'value': x_pos},
 			{'name': 'Y-Position', 'type': 'int', 'value': y_pos},
-			{'name': 'Arrow Type', 'type': 'int', 'value': arrow_type}
+			{'name': 'Type', 'type': 'int', 'value': arrow_type}
 		]})
 		self.num = num + 1
+
+	def removeArrow(self, name):
+		child = self.children()
+		for c in child:
+			if c.name() == name:
+				self.removeChild(c) 
 
 	# 화살표 parameter를 모두 지움.
 	def removeArrowAll(self):
 		self.clearChildren()
 
+	
+class MyTreeWidget(ParameterTree):
+	def __init__(self, parent = None):
+		super(MyTreeWidget, self).__init__(parent)
+		self.setDragEnabled(True)
+		self.setAcceptDrops(True)
+		self.setHeaderLabels(["Parameter"])
+		self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+	
+		self.actionRemove = QtGui.QAction('remove', self)
+		self.actionRemoveAll = QtGui.QAction('remove all', self)
+		
+		self.actionRemove.triggered.connect(self.remove)
+		self.actionRemoveAll.triggered.connect(self.remove_all)
+
+		self.popMenu = QtGui.QMenu(self)
+		self.popMenu.addAction(self.actionRemove)
+		self.popMenu.addAction(self.actionRemoveAll)
+
+		#self.main_window = main_window
+
+	def mouseDoubleClickEvent(self, event):
+		super(MyTreeWidget, self).mouseDoubleClickEvent(event)
+
+	def mousePressEvent(self, event):
+		super(MyTreeWidget, self).mousePressEvent(event)
+
+		if event.button() == QtCore.Qt.RightButton:
+			if super(MyTreeWidget, self).itemAt(event.pos()).text(0) == "Arrow":
+				pass
+			elif super(MyTreeWidget, self).itemAt(event.pos()).text(0).contains("Arrow"):
+				self.pos = event.pos()
+				self.popMenu.exec_(event.globalPos())	
+
+	def remove(self, arrow_name):
+		self.main_window.removeArrow(super(MyTreeWidget, self).itemAt(self.pos))
+		#super(MyTreeWidget, self).itemAt(self.pos).parent().removeChild(super(MyTreeWidget, self).itemAt(self.pos))
+
+	def remove_all(self):
+		self.main_window.removeArrowAll()
+
+	def setMainWindow(self, main):
+		self.main_window = main
 
 class Window(QtGui.QMainWindow):
 	def __init__(self):
@@ -753,11 +827,11 @@ class Window(QtGui.QMainWindow):
 		elif(event.key()==QtCore.Qt.Key_9):
 			self.ui.insertArrow(6)
 
+	def mousePressEvent(self, event):
+		print 'hi'
+
 	def closeEvent(self, event):
 		self.ui.save_setting()
-
-from pyqtgraph import PlotWidget
-from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
 
 if __name__ == "__main__":
 	import sys

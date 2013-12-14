@@ -252,8 +252,14 @@ class Ui_MainWindow(object):
 		"""
 		self.plotwidget_lst = [self.graphicsView, self.graphicsView_2, self.graphicsView_3, self.graphicsView_4, self.graphicsView_5, self.graphicsView_6, self.graphicsView_7, self.graphicsView_8]
 		self.plotwidget_lst.reverse()
+
+		"""
+		File 관련 액션에 함수 연결
+		"""
 		self.actionFile.triggered.connect(self.open)
 		self.actionSave.triggered.connect(self.save)
+		self.actionSave_as.triggered.connect(self.save_as)
+		self.actionClose.triggered.connect(self.close)
 
 		"""
 		화살표 액션 연결 코드
@@ -358,6 +364,7 @@ class Ui_MainWindow(object):
 		self.splitter_2.setSizes(lst)
 			
 	def open(self):							# 파일을 여는 함수. 확장자가 .csv이면 최초로 여는 것이고 .st이면 저장된 세팅을 불러와서 연다.
+		self.fname = ""
 		fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
 		name = fname.split("/") 
 		self.file_name = name[len(name)-1]
@@ -421,8 +428,12 @@ class Ui_MainWindow(object):
 		self.arrow_lst = []
 			
 	def save(self):						# 저장해야 될 정보를 저장하는 함수. pickle을 이용해서 저장한다.
-		fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/')
-		name = fname.split("/")
+		if self.fname is not "":
+			pass			
+		else:
+			self.fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/')
+
+		name = self.fname.split("/")
 		
 		region_width_lst = []			# 파일 이름 및 Region 저장
 		for region in self.graph.region_lst:
@@ -447,6 +458,48 @@ class Ui_MainWindow(object):
 		f = open('setting', 'w+')
 		pickle.dump(settings, f)
 		f.close()
+
+	"""
+	최초로 save할 때와 같은 함수 내용을 사용한다.
+	"""
+	def save_as(self):
+		self.fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file As', '~/')
+		name = self.fname.split("/")
+		
+		region_width_lst = []			# 파일 이름 및 Region 저장
+		for region in self.graph.region_lst:
+			region_width_lst.append(region.getRegion())
+
+		settings = {'file_name': self.file_name, 'region_width': region_width_lst}
+
+		# 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
+		f = open(name[len(name)-1] + ".st", 'w+')
+		pickle.dump(settings, f)
+		f.close()
+
+		main_setting = self.splitter_3.sizes()
+		control_setting = self.splitter.sizes()
+		graph_setting = self.splitter_2.sizes()
+
+		graph_num = 0
+		for graph in graph_setting:
+			if graph != 0:
+				graph_num += 1
+		settings = {'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
+		f = open('setting', 'w+')
+		pickle.dump(settings, f)
+		f.close()
+
+	"""
+	저장 파일의 이름을 초기화하고 widget에서 plot을 지우고 ROI와 Arrow Parameter를 지운다.
+	"""
+	def close(self):
+		self.fname = ""
+
+		for widget in self.plotwidget_lst:
+			widget.clear()
+
+		self.arrowParameter.remove()
 
 	#최초에 프로그램을 열 때 호출되는 함수로, 저장된 layout설정 파일이 있으면 파일을 열어서 설정을 복구한다.
 	def restore(self, MainWindow):

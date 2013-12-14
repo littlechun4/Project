@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 # Form implementation generated from reading ui file 'ui2.ui'
 #
 # Created: Wed Dec  4 15:36:01 2013
@@ -413,17 +414,41 @@ class Ui_MainWindow(object):
     
     def optionScroll(self):
         self.w = ScrollPopup()
-        self.w.setGeometry(QtCore.QRect(100, 100, 200, 400))
-        self.w.show()
+        #self.w.setGeometry(QtCore.QRect(100, 100, 400, 400))
+        #self.w.show()
 
 class ScrollPopup(QtGui.QWidget):
     def __init__(self):
         QtGui.QWidget.__init__(self)
+        self.initUI()
 
-    def paintEvent(self, e):
-        dc = QtGui.QPainter(self)
-        dc.drawLine(0, 0, 100, 100)
-        dc.drawLine(100, 0, 0, 100)
+    def initUI(self):
+        self.text1 = QtGui.QLabel(QtCore.QString('Speed: '), self)
+        self.velocity = QtGui.QLineEdit(self)
+        self.unit = QtGui.QComboBox(self)
+        self.unit.addItem('ms')
+        self.unit.addItem('sec')
+        self.ok = QtGui.QPushButton('OK', self)
+        self.cancel = QtGui.QPushButton('Cancel', self)
+
+        self.text1.move(30, 15)
+        self.velocity.move(90, 15)
+        self.unit.move(240, 15)
+
+        self.ok.move(60, 70)
+        self.cancel.move(150, 70)
+
+        self.ok.clicked.connect(self.okPushed)
+        self.cancel.clicked.connect(self.cancelPushed)
+
+        self.setGeometry(QtCore.QRect(100, 100, 300, 100))
+        self.show()
+
+    def okPushed(self):
+        print('ok pushed!')
+    def cancelPushed(self):
+        print('cancel pushed!')
+
 
 class Window(QtGui.QMainWindow):
     def __init__(self):

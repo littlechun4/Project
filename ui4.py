@@ -165,28 +165,20 @@ class Ui_MainWindow(object):
 		self.actionClose.setObjectName(_fromUtf8("actionClose"))
 		self.action1_2 = QtGui.QAction(MainWindow)
 		self.action1_2.setObjectName(_fromUtf8("action1_2"))
-		self.action1_2.triggered.connect(lambda: self.graphWindow(1))
 		self.action2_2 = QtGui.QAction(MainWindow)
 		self.action2_2.setObjectName(_fromUtf8("action2_2"))
-		self.action2_2.triggered.connect(lambda: self.graphWindow(2))
 		self.action3_2 = QtGui.QAction(MainWindow)
 		self.action3_2.setObjectName(_fromUtf8("action3_2"))
-		self.action3_2.triggered.connect(lambda: self.graphWindow(3))
 		self.action4_2 = QtGui.QAction(MainWindow)
 		self.action4_2.setObjectName(_fromUtf8("action4_2"))
-		self.action4_2.triggered.connect(lambda: self.graphWindow(4))
 		self.action5_2 = QtGui.QAction(MainWindow)
 		self.action5_2.setObjectName(_fromUtf8("action5_2"))
-		self.action5_2.triggered.connect(lambda: self.graphWindow(5))
 		self.action6_2 = QtGui.QAction(MainWindow)
 		self.action6_2.setObjectName(_fromUtf8("action6_2"))
-		self.action6_2.triggered.connect(lambda: self.graphWindow(6))
 		self.action7_2 = QtGui.QAction(MainWindow)
 		self.action7_2.setObjectName(_fromUtf8("action7_2"))
-		self.action7_2.triggered.connect(lambda: self.graphWindow(7))
 		self.action8_2 = QtGui.QAction(MainWindow)
 		self.action8_2.setObjectName(_fromUtf8("action8_2"))
-		self.action8_2.triggered.connect(lambda: self.graphWindow(8))
 		self.menuMenu.addAction(self.actionFile)
 		self.menuMenu.addAction(self.actionSave)
 		self.menuMenu.addAction(self.actionSave_as)
@@ -248,6 +240,18 @@ class Ui_MainWindow(object):
 		self.toolBar_4.addAction(self.actionW)
 		self.toolBar_4.addAction(self.actionM)
 		self.toolBar_4.addAction(self.actionRemove_All)
+
+		"""
+		Graph Layout 액션에 함수 연결
+		"""
+		self.action1_2.triggered.connect(lambda: self.graphWindow(1))
+		self.action2_2.triggered.connect(lambda: self.graphWindow(2))
+		self.action3_2.triggered.connect(lambda: self.graphWindow(3))
+		self.action4_2.triggered.connect(lambda: self.graphWindow(4))
+		self.action5_2.triggered.connect(lambda: self.graphWindow(5))
+		self.action6_2.triggered.connect(lambda: self.graphWindow(6))
+		self.action7_2.triggered.connect(lambda: self.graphWindow(7))
+		self.action8_2.triggered.connect(lambda: self.graphWindow(8))
 
 		"""
 		self.plotwidget_lst = 그래프를 위에서부터 넣은 리스트
@@ -349,6 +353,7 @@ class Ui_MainWindow(object):
 		self.graphicsView_2.hide()
 
 	def graphWindow(self, num):				# 인자로 받는 num의 수만큼 그래프를 표시해주고 크기도 균등하게 나눔.
+		self.num = num
 		idx = 0
 		width = self.splitter_2.height()/num
 		lst = []
@@ -515,6 +520,7 @@ class Ui_MainWindow(object):
 		
 		except IOError:
 			self.setSize(MainWindow)
+			self.graphWindow(1)
 
 	"""
 	화살표 삽입 함수. 화살표 종류를 int 인자로 받아서 타입에 맞춰 적절한 화살표를 삽입한다.
@@ -538,7 +544,7 @@ class Ui_MainWindow(object):
 			else:
 				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
 
-			x1, x2 = self.plotwidget_lst[7].getViewBox().viewRange()[0]
+			x1, x2 = self.plotwidget_lst[7-self.num+1].getViewBox().viewRange()[0]
 			x_pos = (x2-x1)/2 + x1
 			i = bisect_left(self.times, x_pos)
 			arrow.setPos(x_pos, self.lst[i])

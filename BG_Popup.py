@@ -2,12 +2,13 @@
 
 # Form implementation generated from reading ui file 'TimePopup.ui'
 #
-# Created: Sat Dec 14 16:13:07 2013
+# Created: Sun Dec 15 02:57:37 2013
 #	  by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
+from datetime import datetime
 
 try:
 	_fromUtf8 = QtCore.QString.fromUtf8
@@ -45,14 +46,14 @@ class Ui_Dialog(object):
 		self.spinBox_4.setMaximum(2090)
 		self.spinBox_4.setObjectName(_fromUtf8("spinBox_4"))
 		self.spinBox_5 = QtGui.QSpinBox(Dialog)
-		self.spinBox_5.setGeometry(QtCore.QRect(310, 90, 81, 41))
+		self.spinBox_5.setGeometry(QtCore.QRect(230, 90, 81, 41))
 		self.spinBox_5.setMinimum(1)
-		self.spinBox_5.setMaximum(31)
+		self.spinBox_5.setMaximum(12)
 		self.spinBox_5.setObjectName(_fromUtf8("spinBox_5"))
 		self.spinBox_6 = QtGui.QSpinBox(Dialog)
-		self.spinBox_6.setGeometry(QtCore.QRect(230, 90, 81, 41))
+		self.spinBox_6.setGeometry(QtCore.QRect(310, 90, 81, 41))
 		self.spinBox_6.setMinimum(1)
-		self.spinBox_6.setMaximum(12)
+		self.spinBox_6.setMaximum(31)
 		self.spinBox_6.setObjectName(_fromUtf8("spinBox_6"))
 		self.label = QtGui.QLabel(Dialog)
 		self.label.setGeometry(QtCore.QRect(20, 20, 101, 41))
@@ -62,16 +63,16 @@ class Ui_Dialog(object):
 		self.label_2.setGeometry(QtCore.QRect(20, 90, 101, 41))
 		self.label_2.setAlignment(QtCore.Qt.AlignCenter)
 		self.label_2.setObjectName(_fromUtf8("label_2"))
-		self.widget = QtGui.QWidget(Dialog)
-		self.widget.setGeometry(QtCore.QRect(310, 168, 178, 41))
-		self.widget.setObjectName(_fromUtf8("widget"))
-		self.horizontalLayout = QtGui.QHBoxLayout(self.widget)
+		self.layoutWidget = QtGui.QWidget(Dialog)
+		self.layoutWidget.setGeometry(QtCore.QRect(310, 168, 178, 41))
+		self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
+		self.horizontalLayout = QtGui.QHBoxLayout(self.layoutWidget)
 		self.horizontalLayout.setMargin(0)
 		self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-		self.pushButton = QtGui.QPushButton(self.widget)
+		self.pushButton = QtGui.QPushButton(self.layoutWidget)
 		self.pushButton.setObjectName(_fromUtf8("pushButton"))
 		self.horizontalLayout.addWidget(self.pushButton)
-		self.pushButton_2 = QtGui.QPushButton(self.widget)
+		self.pushButton_2 = QtGui.QPushButton(self.layoutWidget)
 		self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
 		self.horizontalLayout.addWidget(self.pushButton_2)
 		self.actionOK = QtGui.QAction(Dialog)
@@ -82,8 +83,6 @@ class Ui_Dialog(object):
 		self.retranslateUi(Dialog)
 		QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-		
-		
 	def retranslateUi(self, Dialog):
 		Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
 		self.label.setText(QtGui.QApplication.translate("Dialog", "<html><head/><body><p><span style=\" font-size:18pt;\">시작 지점</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
@@ -99,7 +98,7 @@ class Ui_Dialog(object):
 		return {'start': start, 'end': end}
 
 class BGFill_Dialog(QtGui.QDialog):
-	def __init__(self):
+	def __init__(self, start_timestamp):
 		import sys
 		self.Dialog = QtGui.QDialog()
 		self.ui = Ui_Dialog()
@@ -108,6 +107,7 @@ class BGFill_Dialog(QtGui.QDialog):
 		self.ui.pushButton.clicked.connect(lambda: QtGui.QDialog.accept(self.Dialog))
 		self.ui.pushButton_2.clicked.connect(lambda: QtGui.QDialog.reject(self.Dialog))
 
+		self.baseValue(start_timestamp)
 		self.Dialog.show()
 	
 	def activate(self):
@@ -117,3 +117,23 @@ class BGFill_Dialog(QtGui.QDialog):
 		else:
 			self.close()
 	
+	def baseValue(self, start_timestamp):
+		time = datetime.fromtimestamp(start_timestamp/1000)
+		year = time.year
+		month = time.month
+		day = time.day
+		hour = time.hour
+		minute = time.minute
+
+		self.ui.spinBox.setValue(year)
+		self.ui.spinBox_4.setValue(year)
+
+		self.ui.spinBox_2.setValue(month)
+		self.ui.spinBox_5.setValue(month)
+
+		self.ui.spinBox_3.setValue(day)
+		self.ui.spinBox_6.setValue(day)
+
+		time_edit = QtCore.QTime(hour, minute)
+		self.ui.timeEdit.setTime(time_edit)
+		self.ui.timeEdit_2.setTime(time_edit)

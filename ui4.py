@@ -293,7 +293,8 @@ class Ui_MainWindow(object):
 		팝업 관련 모음
 		"""
 		self.actionBG_Fill.triggered.connect(self.bg_fill)
-		
+		self.bg_rect_lst = []
+
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 		self.restore(MainWindow)
@@ -698,24 +699,27 @@ class Ui_MainWindow(object):
 			print('Error!')		
 
 	def bg_fill(self):
-		self.bg = BG_Popup.BGFill_Dialog()
-		try:
-			value = self.bg.activate()
-			start = value['start']
-			end = value['end']
+		self.bg = BG_Popup.BGFill_Dialog(self.times[0])
+		value = self.bg.activate()
+
+		if len(self.bg_rect_lst) != 0:
+			for (rect, widget) in zip(self.bg_rect_lst, self.plotwidget_lst):
+				widget.removeItem(rect)
+			self.bg_rect_lst = []
+
+		start = value['start']
+		end = value['end']
+	
+		start_stamp = time.mktime(datetime(start['year'], start['month'], start['day'], start['time'].hour(), start['time'].minute(), start['time'].second()).timetuple()) * 1000
+		end_stamp = time.mktime(datetime(end['year'], end['month'], end['day'], end['time'].hour(), end['time'].minute(), end['time'].second()).timetuple()) * 1000
 		
-			start_stamp = time.mktime(datetime(start['year'], start['month'], start['day'], start['time'].hour(), start['time'].minute(), start['time'].second()).timetuple()) * 1000
-			end_stamp = time.mktime(datetime(end['year'], end['month'], end['day'], end['time'].hour(), end['time'].minute(), end['time'].second()).timetuple()) * 1000
-			
-			for widget in self.plotwidget_lst:
-				rect = pg.QtGui.QGraphicsRectItem(start_stamp, -10000, end_stamp-start_stamp, 20000)
-				rect.setBrush(pg.mkBrush('#C9BB89'))
-				rect.setZValue(-1000)
-				widget.addItem(rect)
-
-		except RuntimeError:
-			pass
-
+		for widget in self.plotwidget_lst:
+			rect = pg.QtGui.QGraphicsRectItem(start_stamp, -10000, end_stamp-start_stamp, 20000)
+			rect.setBrush(pg.mkBrush('#C9BB89'))
+			rect.setZValue(-1000)
+			widget.addItem(rect)
+			self.bg_rect_lst.append(rect)
+	
 class ArrowParameter(pTypes.GroupParameter):
 	""" 
 	화살표를 위한 별도의 parameter 클래스이다.

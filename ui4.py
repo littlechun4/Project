@@ -409,6 +409,13 @@ class Ui_MainWindow(object):
 			f = open(name[len(name)-1], 'r')
 			settings = pickle.load(f)
 			f.close()
+		
+			#Layout 설정 복구
+			self.splitter_3.setSizes(settings['main'])
+			self.splitter.setSizes(settings['control'])
+			self.graphWindow(settings['graph_num'])
+			self.splitter_2.setSizes(settings['graph'])
+
 			graph_file = './' + settings['file_name']
 			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value'])
 			rd2 = pd.read_csv('./synth.csv', header=None, names=['dt', ''])
@@ -429,11 +436,24 @@ class Ui_MainWindow(object):
 
 			self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
 
-		"""
-		화살표 리스트 초기화
-		"""
+		#화살표 리스트 초기화
 		self.arrow_lst = []
-			
+	
+	def save_setting(self):
+		# 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
+		main_setting = self.splitter_3.sizes()
+		control_setting = self.splitter.sizes()
+		graph_setting = self.splitter_2.sizes()
+
+		graph_num = 0
+		for graph in graph_setting:
+			if graph != 0:
+				graph_num += 1
+		settings = {'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
+		f = open('setting', 'w+')
+		pickle.dump(settings, f)
+		f.close()
+		
 	def save(self):						# 저장해야 될 정보를 저장하는 함수. pickle을 이용해서 저장한다.
 		if self.fname is not "":
 			pass			
@@ -445,14 +465,7 @@ class Ui_MainWindow(object):
 		region_width_lst = []			# 파일 이름 및 Region 저장
 		for region in self.graph.region_lst:
 			region_width_lst.append(region.getRegion())
-
-		settings = {'file_name': self.file_name, 'region_width': region_width_lst}
-
-		# 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
-		f = open(name[len(name)-1] + ".st", 'w+')
-		pickle.dump(settings, f)
-		f.close()
-
+		
 		main_setting = self.splitter_3.sizes()
 		control_setting = self.splitter.sizes()
 		graph_setting = self.splitter_2.sizes()
@@ -461,10 +474,13 @@ class Ui_MainWindow(object):
 		for graph in graph_setting:
 			if graph != 0:
 				graph_num += 1
-		settings = {'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
-		f = open('setting', 'w+')
+
+		settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
+
+		f = open(name[len(name)-1] + ".st", 'w+')
 		pickle.dump(settings, f)
 		f.close()
+		
 
 	"""
 	최초로 save할 때와 같은 함수 내용을 사용한다.
@@ -476,14 +492,7 @@ class Ui_MainWindow(object):
 		region_width_lst = []			# 파일 이름 및 Region 저장
 		for region in self.graph.region_lst:
 			region_width_lst.append(region.getRegion())
-
-		settings = {'file_name': self.file_name, 'region_width': region_width_lst}
-
-		# 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
-		f = open(name[len(name)-1] + ".st", 'w+')
-		pickle.dump(settings, f)
-		f.close()
-
+		
 		main_setting = self.splitter_3.sizes()
 		control_setting = self.splitter.sizes()
 		graph_setting = self.splitter_2.sizes()
@@ -492,11 +501,13 @@ class Ui_MainWindow(object):
 		for graph in graph_setting:
 			if graph != 0:
 				graph_num += 1
-		settings = {'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
-		f = open('setting', 'w+')
+
+		settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
+
+		f = open(name[len(name)-1] + ".st", 'w+')
 		pickle.dump(settings, f)
 		f.close()
-
+		
 	"""
 	저장 파일의 이름을 초기화하고 widget에서 plot을 지우고 ROI와 Arrow Parameter를 지운다.
 	"""
@@ -658,6 +669,9 @@ class Window(QtGui.QMainWindow):
 			self.ui.insertArrow(5)
 		elif(event.key()==QtCore.Qt.Key_9):
 			self.ui.insertArrow(6)
+
+	def closeEvent(self, event):
+		self.ui.save_setting()
 
 from pyqtgraph import PlotWidget
 from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType

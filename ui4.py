@@ -13,7 +13,7 @@ import pandas as pd
 import pyqtgraph as pg
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from CustomGraph import CustomGraph, CustomAxis
-from bisect import bisect_left
+from bisect import bisect_right
 import time
 from datetime import datetime
 
@@ -24,7 +24,6 @@ except AttributeError:
 
 class Ui_MainWindow(object):
 	def setupUi(self, MainWindow):
-
 		MainWindow.setObjectName(_fromUtf8("MainWindow"))
 		MainWindow.resize(844, 833)
 		self.centralwidget = QtGui.QWidget(MainWindow)
@@ -543,22 +542,22 @@ class Ui_MainWindow(object):
 		arrow_lst = []
 		for widget in self.plotwidget_lst:
 			if arrow_type == 1:
-				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
-			elif arrow_type == 2:
-				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
-			elif arrow_type == 3:
-				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
-			elif arrow_type == 4:
 				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
-			elif arrow_type == 5:
+			elif arrow_type == 2:
 				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
-			else:
+			elif arrow_type == 3:
 				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+			elif arrow_type == 4:
+				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			elif arrow_type == 5:
+				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			else:
+				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
 
 			x1, x2 = self.plotwidget_lst[7-self.num+1].getViewBox().viewRange()[0]
 			x_pos = (x2-x1)/2 + x1
-			i = bisect_left(self.times, x_pos)
-			arrow.setPos(x_pos, self.lst[i])
+			i = bisect_right(self.times, x_pos) 
+			arrow.setPos(self.times[i], self.lst[i])
 			widget.addItem(arrow)
 			arrow_lst.append(arrow)
 		

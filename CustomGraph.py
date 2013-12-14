@@ -257,19 +257,20 @@ class CustomAxis(pg.AxisItem):
 
         try:
             rng = max(values) - min(values)
+            print rng
             #if rng < 120:
             #    return pg.AxisItem.tickStrings(self, values, scale, spacing)
-            if rng < 60:
+            if rng < 1000*60:
                 string = '%Mm:%Ss '
-            elif rng >= 60 and rng < 3600:
+            elif rng >= 1000*60 and rng < 1000*3600:
                 string = '%Mm:%Ss'
-            elif rng >= 3600 and rng < 3600*24:
+            elif rng >= 1000*3600 and rng < 1000*3600*24:
                 string = '%Hh:%Mm:%Ss'
-            elif rng >= 3600*24 and rng < 3600*24*30:
+            elif rng >= 1000*3600*24 and rng < 1000*3600*24*30:
                 string = '%m/%d'
-            elif rng >= 3600*24*30 and rng < 3600*24*30*24:
+            elif rng >= 1000*3600*24*30 and rng < 1000*3600*24*30*24:
                 string = '%Y/%m'
-            elif rng >=3600*24*30*24:
+            elif rng >= 1000*3600*24*30*24:
                 string = '%Y'
         except:
             string = '%Mm:%Ss'
@@ -277,9 +278,9 @@ class CustomAxis(pg.AxisItem):
         for x in values:
             try:
                 if rng < 60:
-	                strns.append(datetime.fromtimestamp(x).strftime(string) + datetime.fromtimestamp(x).strftime("%f")[:3] + "ms")
+                    strns.append(datetime.fromtimestamp(x/1000).strftime(string) + str(int(x % 1000)) + "ms")
                 else:
-                    strns.append(datetime.fromtimestamp(x).strftime(string))
+                    strns.append(datetime.fromtimestamp(x/1000).strftime(string))
             except ValueError:  ## Windows can't handle dates before 1970
                 strns.append('')# -*- coding: utf-8 -*-
 

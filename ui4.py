@@ -386,7 +386,12 @@ class Ui_MainWindow(object):
 			시간 정보를 받아서 timestamp 형태로 변환
 			"""
 			for dt in rd2.dt:
-				stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S'))
+				try:
+					t = time.strptime(dt, '%Y-%m-%d %H:%M:%S.%f')
+					stamp = time.mktime(t) * 1000 + t.microsecond/1000
+				except:
+					stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S')) * 1000
+
 				self.times += [stamp]
 
 			"""

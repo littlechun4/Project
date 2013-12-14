@@ -163,56 +163,75 @@ class CustomGraph(pg.GraphicsObject):
         #lock이 걸려있으면 동작하지 않음
         if (self.pre_empt == 1):
             return
-
+        
         #lock on
         self.pre_empt = 1
 
-        for level in range(level, 0, -1):
+        left_move = self.region_lst[level].getRegion()[0] - self.old_region_lst[level][0]
+        right_move = self.region_lst[level].getRegion()[1] - self.old_region_lst[level][1]
 
-            next_level = level - 1
+        # It's Scroll!
+        if(left_move==right_move):
 
-            if (next_level==-1):
-                next_level = 7
+            for level in range(level, 0, -1):
 
-            # region이 얼마나 움직였는지 계산.
-            cur_move = self.region_lst[level].getRegion()[0] - self.old_region_lst[level][0]
-            next_move = cur_move
+                next_level = level - 1
 
-            # 다음 그래프의 리젼을 계산
-            next_region = [self.region_lst[next_level].getRegion()[0] + next_move, self.region_lst[next_level].getRegion()[1] + next_move]
+                if (next_level==-1):
+                    next_level = 7
 
-            #old_region_lst update
-            cur_region = self.region_lst[level].getRegion()
-            self.old_region_lst[level][0] = cur_region[0]
-            self.old_region_lst[level][1] = cur_region[1]
+                # region이 얼마나 움직였는지 계산.
+                cur_move = left_move
+                next_move = cur_move
 
-            #다음 그래프와 X,Y레인지와 리젼을 바꾼다.
-            if (next_level != 7):
-                #cur_xrange = [widget_lst[next_level].getViewBox().viewRange[0][0], widget_lst[next_level].getViewBox().viewRange[0][0]]
+                # 다음 그래프의 리젼을 계산
+                next_region = [self.region_lst[next_level].getRegion()[0] + next_move, self.region_lst[next_level].getRegion()[1] + next_move]
+
+                #old_region_lst update
+                cur_region = self.region_lst[level].getRegion()
+                self.old_region_lst[level][0] = cur_region[0]
+                self.old_region_lst[level][1] = cur_region[1]
+
+                #다음 그래프와 X,Y레인지와 리젼을 바꾼다.
+                if (next_level != 7):
+                    #cur_xrange = [widget_lst[next_level].getViewBox().viewRange[0][0], widget_lst[next_level].getViewBox().viewRange[0][0]]
+                    #X레인지 변환
+                    widget_lst[next_level].setXRange(*self.region_lst[level].getRegion(), padding=0)
+                    new_xrange = [widget_lst[next_level].getViewBox().viewRange()[0][0], widget_lst[next_level].getViewBox().viewRange()[0][1]]
+                    #Y레인지 변환
+                    lst_range = getListRange(new_xrange[0], new_xrange[1], self.times)
+                    new_data = self.data[lst_range[0]:lst_range[1]+1]
+
+                    self.y_min = min(new_data)
+                    self.y_max = max(new_data)
+
+                    widget_lst[next_level].setYRange(self.y_min, self.y_max, padding=0, update=True)
+
+                #다음 레벨의 Region변환 self.pre_empt가 설정되어 있으므로 트리거는 X!
+                self.region_lst[next_level].setRegion(next_region)
+                
+        #It's not Scroll!
+        else:
+            #가장 상위 레벨의 그래프일때는 리전이 변환되어도 아무런 일도 안함
+            if(level != 0):
+                next_level = level - 1
+
+                #old_region_lst update
+                cur_region = self.region_lst[level].getRegion()
+                self.old_region_lst[level][0] = cur_region[0]
+                self.old_region_lst[level][1] = cur_region[1]
                 #X레인지 변환
-                widget_lst[next_level].setXRange(*self.region_lst[level].getRegion(), padding=0)
+                widget_lst[next_level].setXRange(*cur_region, padding=0)
                 new_xrange = [widget_lst[next_level].getViewBox().viewRange()[0][0], widget_lst[next_level].getViewBox().viewRange()[0][1]]
                 #Y레인지 변환
-                
-                #min, max값이 바뀌었는지에 대한 flag
-                #flag = True
-                
-                #현재 X범위와 새로운 X범위가 겹침
-                #if(cur_xrange[1] > new_xrange[0]):
-                #   lst_range = getListRange(cur_xrange[1], new_xrange[1], self.times
-                #   lst_range = getListRange(new_xrage[0], new_xrange[1], self.times)
-            
-                #now_min = widget_lst[next_level].getViewBox().
-                
                 lst_range = getListRange(new_xrange[0], new_xrange[1], self.times)
                 new_data = self.data[lst_range[0]:lst_range[1]+1]
-
+          
                 self.y_min = min(new_data)
                 self.y_max = max(new_data)
 
                 widget_lst[next_level].setYRange(self.y_min, self.y_max, padding=0, update=True)
 
-            self.region_lst[next_level].setRegion(next_region)
 
         #lock off
         self.pre_empt = 0

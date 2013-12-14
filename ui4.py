@@ -13,7 +13,9 @@ import pandas as pd
 import pyqtgraph as pg
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from CustomGraph import CustomGraph, CustomAxis
+from bisect import bisect_left
 import time
+from datetime import datetime
 
 try:
 	_fromUtf8 = QtCore.QString.fromUtf8
@@ -537,12 +539,14 @@ class Ui_MainWindow(object):
 				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
 
 			x1, x2 = self.plotwidget_lst[7].getViewBox().viewRange()[0]
-			arrow.setPos(int((x2-x1)/2 + x1), self.lst[int((x2-x1)/2 + x1)])
+			x_pos = (x2-x1)/2 + x1
+			i = bisect_left(self.times, x_pos)
+			arrow.setPos(x_pos, self.lst[i])
 			widget.addItem(arrow)
 			arrow_lst.append(arrow)
 		
 		self.arrow_lst.append(arrow_lst)
-		self.arrowParameter.addArrow(int((x2-x1)/2 + x1), self.lst[int((x2-x1)/2 + x1)], arrow_type)
+		self.arrowParameter.addArrow(datetime.fromtimestamp(x_pos).strftime('%y-%m-%d %H:%M:%S'), self.lst[i], arrow_type)
 
 	"""
 	모든 화살표를 제거한다. parameter도 함께 제거함.
@@ -605,8 +609,8 @@ class ArrowParameter(pTypes.GroupParameter):
 	"""
 	def addArrow(self, x_pos, y_pos, arrow_type):
 		self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
-			{'name': 'X-Position', 'type': 'float', 'value': x_pos},
-			{'name': 'Y-Position', 'type': 'float', 'value': y_pos},
+			{'name': 'X-Position', 'type': 'str', 'value': x_pos},
+			{'name': 'Y-Position', 'type': 'int', 'value': y_pos},
 			{'name': 'Arrow Type', 'type': 'int', 'value': arrow_type}
 		]})
 		self.num += 1

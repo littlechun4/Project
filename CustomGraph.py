@@ -3,6 +3,7 @@
 
 import copy
 import pyqtgraph as pg
+from datetime import datetime
 import time
 from pyqtgraph import QtCore, QtGui
 
@@ -62,7 +63,6 @@ def getListRange(start, end, lst):
     return [s, e]
 
 class CustomGraph(pg.GraphicsObject):       
-
     def __init__(self, data, widget_lst, times):
 
         #save data, stamp
@@ -259,10 +259,12 @@ class CustomAxis(pg.AxisItem):
             rng = max(values) - min(values)
             #if rng < 120:
             #    return pg.AxisItem.tickStrings(self, values, scale, spacing)
-            if rng < 3600:
-                string = '%M:%S'
+            if rng < 60:
+                string = '%Mm:%Ss '
+            elif rng >= 60 and rng < 3600:
+                string = '%Mm:%Ss'
             elif rng >= 3600 and rng < 3600*24:
-                string = '%H:%M:%S'
+                string = '%Hh:%Mm:%Ss'
             elif rng >= 3600*24 and rng < 3600*24*30:
                 string = '%m/%d'
             elif rng >= 3600*24*30 and rng < 3600*24*30*24:
@@ -270,11 +272,14 @@ class CustomAxis(pg.AxisItem):
             elif rng >=3600*24*30*24:
                 string = '%Y'
         except:
-            string = '%M:%S'
+            string = '%Mm:%Ss'
 
         for x in values:
             try:
-                strns.append(time.strftime(string, time.localtime(x)))
+                if rng < 60:
+	                strns.append(datetime.fromtimestamp(x).strftime(string) + datetime.fromtimestamp(x).strftime("%f")[:3] + "ms")
+                else:
+                    strns.append(datetime.fromtimestamp(x).strftime(string))
             except ValueError:  ## Windows can't handle dates before 1970
                 strns.append('')# -*- coding: utf-8 -*-
 

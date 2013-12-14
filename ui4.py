@@ -442,9 +442,14 @@ class Ui_MainWindow(object):
 			self.lst = [] 
 
 			for dt in rd2.dt:
-				stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S'))
+				try:
+					t = time.strptime(dt, '%Y-%m-%d %H:%M:%S.%f')
+					stamp = time.mktime(t) * 1000 + t.microsecond/1000
+				except:
+					stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S')) * 1000
+
 				self.times += [stamp]
- 
+
 			for val in rd.value: 
 			    self.lst += [val] 
 
@@ -457,6 +462,7 @@ class Ui_MainWindow(object):
 			self.treeWidget_2.setParameters(self.parameter, showTop=False)
 			
 			self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
+			self.graph.restoreRegion(settings['region_width'])
 
 			"""
 			화살표 복구
@@ -464,8 +470,9 @@ class Ui_MainWindow(object):
 			for arrow in settings['arrow']:
 				x = arrow['x']
 				y = arrow['y']
+				num = arrow['num']
 				arrow_type = arrow['type']
-				self.arrowRestore(x, y, arrow_type)
+				self.arrowRestore(x, y, num, arrow_type)
 
 	def save_setting(self):
 		# 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
@@ -591,13 +598,13 @@ class Ui_MainWindow(object):
 			arrow_lst.append(arrow)
 		
 		self.arrow_lst.append(arrow_lst)
-		self.arrowParameter.addArrow(datetime.fromtimestamp(x_pos).strftime('%y-%m-%d %H:%M:%S'), self.lst[i], arrow_type)
-		self.arrow_setting_lst.append({'x': self.times[i], 'y': self.lst[i], 'type': arrow_type})
+		num = self.arrowParameter.addArrow(datetime.fromtimestamp(x_pos/1000).strftime('%y-%m-%d %H:%M:%S'), self.lst[i], arrow_type)
+		self.arrow_setting_lst.append({'x': self.times[i], 'y': self.lst[i], 'num': num, 'type': arrow_type})
 
 	"""
 	저장된 화살표를 복구하기 위해 사용하는 함수
 	"""
-	def arrowRestore(self, x, y, arrow_type):
+	def arrowRestore(self, x, y, num, arrow_type):
 		arrow_lst = []
 		for widget in self.plotwidget_lst:
 			if arrow_type == 1:
@@ -618,9 +625,8 @@ class Ui_MainWindow(object):
 			arrow_lst.append(arrow)
 
 		self.arrow_lst.append(arrow_lst)
-		self.arrowParameter.addArrow(datetime.fromtimestamp(x).strftime('%y-%m-%d %H:%M:%S'), y, arrow_type)
-		self.arrow_setting_lst.append({'x': x, 'y': y, 'type': arrow_type})
-
+		self.arrowParameter.restoreArrow(datetime.fromtimestamp(x/1000).strftime('%y-%m-%d %H:%M:%S'), y, num, arrow_type)
+		self.arrow_setting_lst.append({'x': x, 'y': y, 'num': num, 'type': arrow_type})
 
 	"""
 	모든 화살표를 제거한다. parameter도 함께 제거함.
@@ -671,6 +677,8 @@ class Ui_MainWindow(object):
 		self.bg = BG_Popup.BGFill_Dialog()
 		try:
 			value = self.bg.activate()
+			start = value['start']
+			end = value['end']
 		except RuntimeError:
 			pass
 
@@ -696,6 +704,15 @@ class ArrowParameter(pTypes.GroupParameter):
 			{'name': 'Arrow Type', 'type': 'int', 'value': arrow_type}
 		]})
 		self.num += 1
+		return self.num - 1
+
+	def restoreArrow(self, x_pos, y_pos, num, arrow_type):
+		self.addChild({'name': 'Arrow' + str(num), 'type': 'group', 'children': [
+			{'name': 'X-Position', 'type': 'str', 'value': x_pos},
+			{'name': 'Y-Position', 'type': 'int', 'value': y_pos},
+			{'name': 'Arrow Type', 'type': 'int', 'value': arrow_type}
+		]})
+		self.num = num + 1
 
 	# 화살표 parameter를 모두 지움.
 	def removeArrowAll(self):

@@ -404,6 +404,10 @@ class Ui_MainWindow(object):
 
 			self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
 
+			#화살표 리스트 초기화
+			self.arrow_lst = []
+			self.arrow_setting_lst = []
+
 		elif name[len(name)-1].split(".")[1] == "st":
 			f = open(name[len(name)-1], 'r')
 			settings = pickle.load(f)
@@ -428,16 +432,26 @@ class Ui_MainWindow(object):
  
 			for val in rd.value: 
 			    self.lst += [val] 
-			
+
+			#화살표 리스트 초기화
+			self.arrow_lst = []
+			self.arrow_setting_lst = []
+						
 			self.arrowParameter = ArrowParameter(name='Arrow')
 			self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
 			self.treeWidget_2.setParameters(self.parameter, showTop=False)
-
+			
 			self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
 
-		#화살표 리스트 초기화
-		self.arrow_lst = []
-	
+			"""
+			화살표 복구
+			"""
+			for arrow in settings['arrow']:
+				x = arrow['x']
+				y = arrow['y']
+				arrow_type = arrow['type']
+				self.arrowRestore(x, y, arrow_type)
+
 	def save_setting(self):
 		# 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
 		main_setting = self.splitter_3.sizes()
@@ -474,7 +488,7 @@ class Ui_MainWindow(object):
 			if graph != 0:
 				graph_num += 1
 
-		settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
+		settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst}
 
 		f = open(name[len(name)-1] + ".st", 'w+')
 		pickle.dump(settings, f)
@@ -501,7 +515,7 @@ class Ui_MainWindow(object):
 			if graph != 0:
 				graph_num += 1
 
-		settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num}
+		settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst}
 
 		f = open(name[len(name)-1] + ".st", 'w+')
 		pickle.dump(settings, f)
@@ -563,6 +577,35 @@ class Ui_MainWindow(object):
 		
 		self.arrow_lst.append(arrow_lst)
 		self.arrowParameter.addArrow(datetime.fromtimestamp(x_pos).strftime('%y-%m-%d %H:%M:%S'), self.lst[i], arrow_type)
+		self.arrow_setting_lst.append({'x': self.times[i], 'y': self.lst[i], 'type': arrow_type})
+
+	"""
+	저장된 화살표를 복구하기 위해 사용하는 함수
+	"""
+	def arrowRestore(self, x, y, arrow_type):
+		arrow_lst = []
+		for widget in self.plotwidget_lst:
+			if arrow_type == 1:
+				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+			elif arrow_type == 2:
+				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+			elif arrow_type == 3:
+				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='b')
+			elif arrow_type == 4:
+				arrow = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			elif arrow_type == 5:
+				arrow = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+			else:
+				arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
+
+			arrow.setPos(x, y)
+			widget.addItem(arrow)
+			arrow_lst.append(arrow)
+
+		self.arrow_lst.append(arrow_lst)
+		self.arrowParameter.addArrow(datetime.fromtimestamp(x).strftime('%y-%m-%d %H:%M:%S'), y, arrow_type)
+		self.arrow_setting_lst.append({'x': x, 'y': y, 'type': arrow_type})
+
 
 	"""
 	모든 화살표를 제거한다. parameter도 함께 제거함.
@@ -622,6 +665,7 @@ class ArrowParameter(pTypes.GroupParameter):
  
 	"""
 	화살표 추가의 경우 인자로 x, y, type을 받아서 각각의 정보를 arrow + number의 group아래 띄워준다.
+	그리고 저장을 위해서 이름으로 사용했던 num을 넘겨준다.
 	"""
 	def addArrow(self, x_pos, y_pos, arrow_type):
 		self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
@@ -634,7 +678,7 @@ class ArrowParameter(pTypes.GroupParameter):
 	# 화살표 parameter를 모두 지움.
 	def removeArrowAll(self):
 		self.clearChildren()
-
+	
 class Window(QtGui.QMainWindow):
 	def __init__(self):
 		super(Window, self).__init__()

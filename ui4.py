@@ -16,6 +16,7 @@ from CustomGraph import CustomGraph, CustomAxis
 from bisect import bisect_right
 import time
 from datetime import datetime
+import BG_Popup
 
 try:
 	_fromUtf8 = QtCore.QString.fromUtf8
@@ -178,6 +179,8 @@ class Ui_MainWindow(object):
 		self.action7_2.setObjectName(_fromUtf8("action7_2"))
 		self.action8_2 = QtGui.QAction(MainWindow)
 		self.action8_2.setObjectName(_fromUtf8("action8_2"))
+		self.actionBG_Fill = QtGui.QAction(MainWindow)
+		self.actionBG_Fill.setObjectName(_fromUtf8("actionBG_Fill"))
 		self.menuMenu.addAction(self.actionFile)
 		self.menuMenu.addAction(self.actionSave)
 		self.menuMenu.addAction(self.actionSave_as)
@@ -211,6 +214,7 @@ class Ui_MainWindow(object):
 		self.menuInsert.addAction(self.actionArrow_6)
 		self.menuArrow.addAction(self.menuInsert.menuAction())
 		self.menuArrow.addAction(self.actionRemove_All_2)
+		self.menuBG_Fill.addAction(self.actionBG_Fill)
 		self.menubar.addAction(self.menuMenu.menuAction())
 		self.menubar.addAction(self.menuLayout.menuAction())
 		self.menubar.addAction(self.menuScroll.menuAction())
@@ -283,6 +287,10 @@ class Ui_MainWindow(object):
 		self.actionResume.triggered.connect(self.resumeScroll)
 		self.actionStop.triggered.connect(self.stopScroll)
 
+		"""
+		팝업 관련 모음
+		"""
+		self.actionBG_Fill.triggered.connect(self.bg_fill)
 		
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -338,6 +346,8 @@ class Ui_MainWindow(object):
 		self.action6_2.setText(QtGui.QApplication.translate("MainWindow", "6", None, QtGui.QApplication.UnicodeUTF8))
 		self.action7_2.setText(QtGui.QApplication.translate("MainWindow", "7", None, QtGui.QApplication.UnicodeUTF8))
 		self.action8_2.setText(QtGui.QApplication.translate("MainWindow", "8", None, QtGui.QApplication.UnicodeUTF8))
+		self.actionBG_Fill.setText(QtGui.QApplication.translate("MainWindow", "BG_Fill", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 	def setSize(self, MainWindow):			# 저장된 설정 파일이 없을 때 최초로 ui 크기를 설정해 주는 함수
@@ -657,6 +667,13 @@ class Ui_MainWindow(object):
 		except:
 			print('Error!')		
 
+	def bg_fill(self):
+		self.bg = BG_Popup.BGFill_Dialog()
+		try:
+			value = self.bg.activate()
+		except RuntimeError:
+			pass
+
 class ArrowParameter(pTypes.GroupParameter):
 	""" 
 	화살표를 위한 별도의 parameter 클래스이다.
@@ -683,7 +700,8 @@ class ArrowParameter(pTypes.GroupParameter):
 	# 화살표 parameter를 모두 지움.
 	def removeArrowAll(self):
 		self.clearChildren()
-	
+
+
 class Window(QtGui.QMainWindow):
 	def __init__(self):
 		super(Window, self).__init__()

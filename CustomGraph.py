@@ -257,7 +257,6 @@ class CustomAxis(pg.AxisItem):
 
         try:
             rng = max(values) - min(values)
-            print rng
             #if rng < 120:
             #    return pg.AxisItem.tickStrings(self, values, scale, spacing)
             if rng < 1000*60:

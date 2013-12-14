@@ -703,6 +703,16 @@ class Ui_MainWindow(object):
 			value = self.bg.activate()
 			start = value['start']
 			end = value['end']
+		
+			start_stamp = time.mktime(datetime(start['year'], start['month'], start['day'], start['time'].hour(), start['time'].minute(), start['time'].second()).timetuple()) * 1000
+			end_stamp = time.mktime(datetime(end['year'], end['month'], end['day'], end['time'].hour(), end['time'].minute(), end['time'].second()).timetuple()) * 1000
+			
+			for widget in self.plotwidget_lst:
+				rect = pg.QtGui.QGraphicsRectItem(start_stamp, -10000, end_stamp-start_stamp, 20000)
+				rect.setBrush(pg.mkBrush('#C9BB89'))
+				rect.setZValue(-1000)
+				widget.addItem(rect)
+
 		except RuntimeError:
 			pass
 

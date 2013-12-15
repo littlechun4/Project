@@ -739,18 +739,18 @@ class ArrowParameter(pTypes.GroupParameter):
 	"""
 	def addArrow(self, x_pos, y_pos, arrow_type):
 		self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
-			{'name': 'X-Position', 'type': 'str', 'value': x_pos},
-			{'name': 'Y-Position', 'type': 'int', 'value': y_pos},
-			{'name': 'Type', 'type': 'int', 'value': arrow_type}
+			{'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
+			{'name': 'Y-Position', 'type': 'int', 'value': y_pos, 'readonly': True},
+			{'name': 'Type', 'type': 'int', 'value': arrow_type, 'readonly': True}
 		]})
 		self.num += 1
 		return self.num - 1
 
 	def restoreArrow(self, x_pos, y_pos, num, arrow_type):
 		self.addChild({'name': 'Arrow' + str(num), 'type': 'group', 'children': [
-			{'name': 'X-Position', 'type': 'str', 'value': x_pos},
-			{'name': 'Y-Position', 'type': 'int', 'value': y_pos},
-			{'name': 'Type', 'type': 'int', 'value': arrow_type}
+			{'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
+			{'name': 'Y-Position', 'type': 'int', 'value': y_pos, 'readonly': True},
+			{'name': 'Type', 'type': 'int', 'value': arrow_type, 'readonly': True}
 		]})
 		self.num = num + 1
 

@@ -809,7 +809,8 @@ class Ui_MainWindow(object):
         else:
             for roi_setting in self.roi_setting_lst:
                 if roi_setting['num'] == int(num):
-                    self.graph.parameterScroll(roi_setting['x'], self.plotwidget_lst)
+                    ((x1, _), (x2, _)) = roi_setting['coor']
+                    self.graph.parameterScroll((x1 + x2) / 2, self.plotwidget_lst)
 
     def bg_fill(self):
         self.bg = BG_Popup.BGFill_Dialog(self.times[0])

@@ -160,7 +160,6 @@ class CustomGraph(pg.GraphicsObject):
 
     # loop로 동작하여 모든 level의 그래프를 업데이트함
     def updatePlot(self, level, widget_lst):
-        
         #Next curvearrow's pos
         next_pos = 0
 
@@ -236,7 +235,6 @@ class CustomGraph(pg.GraphicsObject):
 
                 widget_lst[next_level].setYRange(self.y_min, self.y_max, padding=0, update=True)
 
-
         #lock off
         self.pre_empt = 0
         return next_pos
@@ -260,7 +258,6 @@ class CustomGraph(pg.GraphicsObject):
         g_end = widget.getViewBox().viewRange()[0][1]
 
         one_step = vel
-        #print(one_step)
 
         new_region = [self.region_lst[8-level].getRegion()[0] + one_step, self.region_lst[8-level].getRegion()[1] + one_step]
 
@@ -311,7 +308,6 @@ class CustomGraph(pg.GraphicsObject):
 
 
         self.pre_empt = 0
-
 
 class CustomAxis(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):

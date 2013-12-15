@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-
 # Form implementation generated from reading ui file 'ui2.ui'
 #
 # Created: Wed Dec  4 15:36:01 2013
-#     by: PyQt4 UI code generator 4.9.1
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore, QtGui
 import pickle
 import pandas as pd
 import pyqtgraph as pg
+from ROIController import ROIController
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from CustomGraph import CustomGraph, CustomAxis
 from bisect import bisect_left, bisect_right
@@ -151,6 +151,10 @@ class Ui_MainWindow(object):
         self.actionW.setObjectName(_fromUtf8("actionW"))
         self.actionM = QtGui.QAction(MainWindow)
         self.actionM.setObjectName(_fromUtf8("actionM"))
+        self.actionTriangle = QtGui.QAction(MainWindow)
+        self.actionTriangle.setObjectName(_fromUtf8("actionTriangle"))
+        self.actionEllipse = QtGui.QAction(MainWindow)
+        self.actionEllipse.setObjectName(_fromUtf8("actionEllipse"))
         self.actionRemove_All = QtGui.QAction(MainWindow)
         self.actionRemove_All.setObjectName(_fromUtf8("actionRemove_All"))
         self.actionArrow_3 = QtGui.QAction(MainWindow)
@@ -212,6 +216,8 @@ class Ui_MainWindow(object):
         self.menuInsert_2.addAction(self.actionRectangle)
         self.menuInsert_2.addAction(self.actionW)
         self.menuInsert_2.addAction(self.actionM)
+        self.menuInsert_2.addAction(self.actionTriangle)
+        self.menuInsert_2.addAction(self.actionEllipse)
         self.menuROI.addAction(self.menuInsert_2.menuAction())
         self.menuROI.addAction(self.actionRemove_All)
         self.menuInsert.addAction(self.actionArrow_1)
@@ -252,6 +258,8 @@ class Ui_MainWindow(object):
         self.toolBar_4.addAction(self.actionRectangle)
         self.toolBar_4.addAction(self.actionW)
         self.toolBar_4.addAction(self.actionM)
+        self.toolBar_4.addAction(self.actionTriangle)
+        self.toolBar_4.addAction(self.actionEllipse)
         self.toolBar_4.addAction(self.actionRemove_All)
 
         """
@@ -297,6 +305,15 @@ class Ui_MainWindow(object):
         self.actionResume.triggered.connect(self.resumeScroll)
         self.actionStop.triggered.connect(self.stopScroll)
         self.actionSet_Scroll_Options.triggered.connect(self.optionScroll)
+
+        #ROI function Connect
+        self.actionLine.triggered.connect(lambda: self.setROI(0))
+        self.actionRectangle.triggered.connect(lambda: self.setROI(1))
+        self.actionW.triggered.connect(lambda: self.setROI(2))
+        self.actionM.triggered.connect(lambda: self.setROI(3))
+        self.actionTriangle.triggered.connect(lambda: self.setROI(4))
+        self.actionEllipse.triggered.connect(lambda: self.setROI(5))
+        self.actionRemove_All.triggered.connect(self.removeROIAll)
 
         """
         팝업 관련 모음
@@ -348,6 +365,8 @@ class Ui_MainWindow(object):
         self.actionRectangle.setText(QtGui.QApplication.translate("MainWindow", "Rectangle", None, QtGui.QApplication.UnicodeUTF8))
         self.actionW.setText(QtGui.QApplication.translate("MainWindow", "W", None, QtGui.QApplication.UnicodeUTF8))
         self.actionM.setText(QtGui.QApplication.translate("MainWindow", "M", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionTriangle.setText(QtGui.QApplication.translate("MainWindow", "Triangle", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionEllipse.setText(QtGui.QApplication.translate("MainWindow", "Ellipse", None, QtGui.QApplication.UnicodeUTF8))
         self.actionRemove_All.setText(QtGui.QApplication.translate("MainWindow", "Remove All", None, QtGui.QApplication.UnicodeUTF8))
         self.actionArrow_3.setText(QtGui.QApplication.translate("MainWindow", "Arrow 3", None, QtGui.QApplication.UnicodeUTF8))
         self.actionArrow_4.setText(QtGui.QApplication.translate("MainWindow", "Arrow 4", None, QtGui.QApplication.UnicodeUTF8))
@@ -433,10 +452,17 @@ class Ui_MainWindow(object):
             parameter를 초기화하고 widget에 추가해 줌.
             """
             self.arrowParameter = ArrowParameter(name='Arrow')
+            self.roiParameter = ROIParameter(name='ROI')
+            self.parameter_1 = Parameter.create(name='Arrow', type='group', children=[self.roiParameter])
+            self.treeWidget.setParameters(self.parameter_1, showTop=False)
             self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
             self.treeWidget_2.setParameters(self.parameter, showTop=False)
 
             self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
+
+            #ROI Controller
+            self.roic = ROIController(self)
+            self.roi_setting_lst = []
 
             #화살표 리스트 초기화
             self.arrow_lst = []
@@ -480,7 +506,12 @@ class Ui_MainWindow(object):
             self.arrowParameter = ArrowParameter(name='Arrow')
             self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
             self.treeWidget_2.setParameters(self.parameter, showTop=False)
-            
+            self.roiParameter = ROIParameter(name='ROI')
+            self.parameter_1 = Parameter.create(name='Arrow', type='group', children=[self.roiParameter])
+            self.treeWidget.setParameters(self.parameter_1, showTop=False)
+            self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
+            self.treeWidget_2.setParameters(self.parameter, showTop=False)
+
             self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
             self.graph.restoreRegion(settings['region_width'])
 
@@ -573,6 +604,7 @@ class Ui_MainWindow(object):
             widget.clear()
 
         self.arrowParameter.remove()
+        self.roiParameter.remove()
 
     #최초에 프로그램을 열 때 호출되는 함수로, 저장된 layout설정 파일이 있으면 파일을 열어서 설정을 복구한다.
     def restore(self, MainWindow):
@@ -715,6 +747,7 @@ class Ui_MainWindow(object):
                 return
             self.scroll_active = False
             self.timer.stop()
+
         except:
             print('Error!')
 
@@ -797,7 +830,93 @@ class Ui_MainWindow(object):
         
         values = {'max': max_lst, 'min': min_lst}
         ds = Data_Popup.DataStat_Dialog(values)
-        
+    
+    # ROI
+    def dragev(self, ev, i, shape):
+        ev.accept()
+        vb = self.plotwidget_lst[i].getViewBox()
+        pos = ev.pos()
+        if self.roi_loc == 1 and ev.button() == QtCore.Qt.LeftButton:                                                                      
+            if ev.isFinish():                                                                                                                
+                vb.rbScaleBox.hide()
+                # set region
+                _, _, xax, yax = vb.rect().getCoords()
+                x1, x2 = self.plotwidget_lst[i].getViewBox().viewRange()[0]
+                y1, y2 = self.plotwidget_lst[i].getViewBox().viewRange()[1]
+                p1, p2 = ev.buttonDownPos(ev.button()), pos
+                xlen, ylen = x2-x1, y2-y1
+                fx1 = x1 + xlen*p1.x()/xax
+                fy1 = y1 + ylen*(yax-p1.y())/yax
+                fx2 = x1 + xlen*p2.x()/xax
+                fy2 = y1 + ylen*(yax-p2.y())/yax
+                # make ROI
+                self.roic.setROI(shape, ((fx1, fy1), (fx2, fy2)))
+                self.roi_loc = 0
+                num = self.roiParameter.addROI(datetime.fromtimestamp((fx1+fx2)/2000).strftime('%y-%m-%d %H:%M:%S'), shape)
+                self.roi_setting_lst.append({'x': (fx1+fx2)/2, 'num': num, 'type': shape})
+            else:                                                                                                               
+                vb.updateScaleBox(ev.buttonDownPos(), ev.pos())
+        else:
+            pg.ViewBox.mouseDragEvent(vb, ev)
+
+    def setROI(self, shape):
+        self.roi_loc = 1
+        self.plotwidget_lst[0].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 0, shape))
+        self.plotwidget_lst[1].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 1, shape))
+        self.plotwidget_lst[2].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 2, shape))
+        self.plotwidget_lst[3].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 3, shape))
+        self.plotwidget_lst[4].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 4, shape))
+        self.plotwidget_lst[5].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 5, shape))
+        self.plotwidget_lst[6].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 6, shape))
+        self.plotwidget_lst[7].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 7, shape))
+
+    def removeROIByObj(self, roi):
+        roi_num = 0
+        for rois in self.roic.getROIList():
+            if rois == None:
+                continue
+            else:
+                found = False
+                for aroi in rois:
+                    if aroi == roi:
+                        found = True
+                        break
+                if found:
+                    break
+            roi_num += 1
+        for i in xrange(len(self.roi_setting_lst)):
+            if self.roi_setting_lst[i] == None:
+                continue
+            elif self.roi_setting_lst[i]['num'] == roi_num:
+                self.roi_setting_lst[i] = None
+                self.roic.removeROI(i)
+                break
+        self.roiParameter.removeROI("ROI"+str(roi_num))
+
+    def removeROIByItem(self, item):
+        roi_num = int(item.text(0).split("ROI")[1])
+        for i in xrange(len(self.roi_setting_lst)):
+            if self.roi_setting_lst[i] == None:
+                continue
+            elif self.roi_setting_lst[i]['num'] == roi_num:
+                self.roi_setting_lst[i] = None
+                self.roic.removeROI(i)
+                break
+        self.roiParameter.removeROI(item.text(0))
+    
+    def popupROI(self):
+        ROIPopup(self)
+        print "popup"
+
+    def removeROIAll(self):
+        '''for roi_lst in self.roi_lst:
+            for (roi, widget) in zip(roi_lst, self.plotwidget_lst):
+                widget.removeItem(roi)
+        self.roi_lst = []'''
+        self.roic.removeAll()
+        self.roiParameter.removeROIAll()
+
+    
 class ArrowParameter(pTypes.GroupParameter):
     """ 
     화살표를 위한 별도의 parameter 클래스이다.
@@ -922,6 +1041,18 @@ class MyTreeWidget(ParameterTree):
         self.popMenu.addAction(self.actionRemove)
         self.popMenu.addAction(self.actionRemoveAll)
 
+        # ROI
+        self.actionRemoveROI = QtGui.QAction('remove', self)
+        self.actionRemoveROIAll = QtGui.QAction('remove all', self)
+        
+        self.actionRemoveROI.triggered.connect(self.removeROI)
+        self.actionRemoveROIAll.triggered.connect(self.removeROI_all)
+
+        self.popMenuROI = QtGui.QMenu(self)
+        self.popMenuROI.addAction(self.actionRemoveROI)
+        self.popMenuROI.addAction(self.actionRemoveROIAll)
+
+
         #self.main_window = main_window
 
     def mouseDoubleClickEvent(self, event):
@@ -940,6 +1071,11 @@ class MyTreeWidget(ParameterTree):
             elif super(MyTreeWidget, self).itemAt(event.pos()).text(0).contains("Arrow"):
                 self.pos = event.pos()
                 self.popMenu.exec_(event.globalPos())   
+            elif super(MyTreeWidget, self).itemAt(event.pos()).text(0) == "ROI":
+                pass
+            elif super(MyTreeWidget, self).itemAt(event.pos()).text(0).contains("ROI"):
+                self.pos = event.pos()
+                self.popMenuROI.exec_(event.globalPos())    
 
     def remove(self, arrow_name):
         self.main_window.removeArrow(super(MyTreeWidget, self).itemAt(self.pos))
@@ -947,6 +1083,13 @@ class MyTreeWidget(ParameterTree):
 
     def remove_all(self):
         self.main_window.removeArrowAll()
+
+    # ROI
+    def removeROI(self):
+        self.main_window.removeROIByItem(super(MyTreeWidget, self).itemAt(self.pos))
+
+    def removeROI_all(self):
+        self.main_window.removeROIAll()
 
     def setMainWindow(self, main):
         self.main_window = main
@@ -958,7 +1101,6 @@ class Window(QtGui.QMainWindow):
         self.ui.setupUi(self)
     
     def keyPressEvent(self, event):
-
         #Scroll mapping keys
         if (event.key()==QtCore.Qt.Key_Q):
             self.ui.startScroll()
@@ -1000,6 +1142,44 @@ class Window(QtGui.QMainWindow):
         
     def closeEvent(self, event):
         self.ui.save_setting()
+
+
+    #def mousePressEvent(self, event):
+    #    print 'hi'
+
+    def closeEvent(self, event):
+        self.ui.save_setting()
+
+class ROIParameter(pTypes.GroupParameter):
+ 
+    def __init__(self, **opts):
+        opts['type'] = 'group'
+        pTypes.GroupParameter.__init__(self, **opts)
+        self.roi_num = 0
+        self.toshape = ['Line', 'Rectangle', 'W', 'M', 'Triangle', 'Ellipse']
+    
+    def addROI(self, x_pos, shape):
+        self.addChild({'name': 'ROI' + str(self.roi_num), 'type': 'group', 'children': [
+            {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
+            {'name': 'Shape', 'type': 'str', 'value': self.toshape[shape], 'readonly': True}
+        ]})
+        self.roi_num += 1
+        return self.roi_num - 1
+       
+    def restoreROI(self, x_pos, num, arrow_type):
+        self.addChild({'name': 'ROI' + str(num), 'type': 'group', 'children': [
+            {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
+            {'name': 'Shape', 'type': 'str', 'value': self.toshape[shape], 'readonly': True}
+        ]})
+        self.roi_num = num + 1
+    
+    def removeROI(self, name):
+        for child in self.children():
+            if child.name() == name:
+                self.removeChild(child) 
+
+    def removeROIAll(self):
+        self.clearChildren()
 
 if __name__ == "__main__":
     import sys

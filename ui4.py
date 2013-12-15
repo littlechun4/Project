@@ -836,9 +836,8 @@ class Ui_MainWindow(object):
     def data_stat(self):
         max_lst = []
         min_lst = []
-        widget_lst = self.plotwidget_lst
-        widget_lst.reverse()
-        for widget in widget_lst[0:self.num]:
+        self.plotwidget_lst.reverse()
+        for widget in self.plotwidget_lst[0:self.num]:
             x1, x2 = widget.getViewBox().viewRange()[0]
             x_start = bisect_right(self.times, x1)
             x_end = bisect_left(self.times, x2)
@@ -850,6 +849,7 @@ class Ui_MainWindow(object):
                 max_lst.append('empty')
                 min_lst.append('empty')
         
+        self.plotwidget_lst.reverse()
         values = {'max': max_lst, 'min': min_lst}
         ds = Data_Popup.DataStat_Dialog(values)
     

@@ -4,6 +4,7 @@
 import copy
 import pyqtgraph as pg
 import time
+from bisect import bisect_left
 from pyqtgraph import QtCore, QtGui
 
 #정렬된 타임스탬프의 레인지를 입력받아 그 인덱스의 레인지를 출력해주는 코드
@@ -263,9 +264,14 @@ class CustomGraph(pg.GraphicsObject):
 
         new_region = [self.region_lst[8-level].getRegion()[0] + one_step, self.region_lst[8-level].getRegion()[1] + one_step]
 
-        new_pos = ((new_region[0] + new_region[1])/2 - g_start)/(g_end - g_start) 
-        curve_arrow.setPos(new_pos)
-        print(new_pos)
+        if(new_region[1] > g_end):
+            return False
+
+        #new_pos = ((new_region[0] + new_region[1])/2 - g_start)/(g_end - g_start)
+        region_mid = (new_region[0] + new_region[1])/2
+        new_index = bisect_left(self.times, region_mid)
+        curve_arrow.setIndex(new_index)
+        #print(new_pos)
 #       if (new_region[1] > g_end):
 #           new_region[0] = g_end - (self.region_lst[8-level].getRegion()[1] - self.region_lst[8-level].getRegion()[0])
 #           new_region[1] = g_end

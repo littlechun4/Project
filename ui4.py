@@ -14,6 +14,7 @@ import pandas as pd
 from CustomGraph import CustomGraph, CustomAxis
 import time
 import pyqtgraph as pg
+from bisect import bisect_left
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -398,9 +399,11 @@ class Ui_MainWindow(object):
         
         cur_viewrange = self.plotwidget_lst[8-self.scroll_level].getViewBox().viewRange()[0]
         cur_region = self.graph.region_lst[8-self.scroll_level].getRegion()
-        cur_pos = (((cur_region[0] + cur_region[1])/2) - cur_viewrange[0]) / (cur_viewrange[1] - cur_viewrange[0])
-        print cur_pos
-        self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8-self.scroll_level].getPlotItem().listDataItems()[0], pos=cur_pos)
+        #cur_pos = (((cur_region[0] + cur_region[1])/2) - cur_viewrange[0]) / (cur_viewrange[1] - cur_viewrange[0])
+        cur_region_mid = (cur_region[0] + cur_region[1])/2
+        cur_index = bisect_left(self.graph.times, cur_region_mid)
+        #print cur_pos
+        self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8-self.scroll_level].getPlotItem().listDataItems()[0], index=cur_index)
         #self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8-self.scroll_level].getPlotItem(), pos=0.5)
         self.plotwidget_lst[8-self.scroll_level].addItem(self.curve_arrow)
         self.timer = QtCore.QTimer()

@@ -421,9 +421,9 @@ class Ui_MainWindow(object):
         self.fname = ""
         fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
         name = fname.split("/") 
-        self.file_name = name[len(name)-1]
-
+        
         if name[len(name)-1][-4:] == '.csv': 
+            self.file_name = name[len(name)-1]
             rd = pd.read_csv(str(fname), index_col=[0], header=None, names=['dt', 'value'])
             rd2 = pd.read_csv(str(fname), header=None, names=['dt', ''])
 
@@ -474,6 +474,8 @@ class Ui_MainWindow(object):
             settings = pickle.load(f)
             f.close()
         
+            self.file_name = (settings['file_name'])
+
             #Layout 설정 복구
             self.splitter_3.setSizes(settings['main'])
             self.splitter.setSizes(settings['control'])
@@ -563,7 +565,6 @@ class Ui_MainWindow(object):
         
         region_width_lst = []           # 파일 이름 및 Region 저장
         for region in self.graph.region_lst:
-            print region.getRegion()
             region_width_lst.append(region.getRegion())
         
         main_setting = self.splitter_3.sizes()

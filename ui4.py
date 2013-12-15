@@ -7,20 +7,26 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
 import pickle
-import pandas as pd
-import pyqtgraph as pg
-from ROIController import ROIController
-import pyqtgraph.parametertree.parameterTypes as pTypes
-from CustomGraph import CustomGraph, CustomAxis
 from bisect import bisect_left, bisect_right
 import time
 from datetime import datetime
-import BG_Popup
-import Data_Popup
+
+from PyQt4 import QtCore, QtGui
+import pandas as pd
+import pyqtgraph as pg
 from pyqtgraph import PlotWidget
 from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
+import pyqtgraph.parametertree.parameterTypes as pTypes
+
+import BG_Popup
+import Data_Popup
+from ROIController import ROIController
+from CustomGraph import CustomGraph, CustomAxis
+from CustomTreeWidget import MyTreeWidget
+from ScrollPopup import ScrollPopup
+from ROIParameter import ROIParameter
+from ArrowParameter import ArrowParameter
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -955,184 +961,6 @@ class Ui_MainWindow(object):
         self.roic.removeAll()
         self.roiParameter.removeROIAll()
 
-    
-class ArrowParameter(pTypes.GroupParameter):
-    """ 
-    화살표를 위한 별도의 parameter 클래스이다.
-    최초에 num을 저장해서 화살표가 구분 표시를 위해 사용하며
-    화살표 추가와 화살표 전부 삭제 기능을 제공한다.
-    """
-    def __init__(self, **opts):
-        #super(ArrowParameter, self).__init__()
-        opts['type'] = 'group'
-        pTypes.GroupParameter.__init__(self, **opts)
-        self.num = 0
- 
-    """
-    화살표 추가의 경우 인자로 x, y, type을 받아서 각각의 정보를 arrow + number의 group아래 띄워준다.
-    그리고 저장을 위해서 이름으로 사용했던 num을 넘겨준다.
-    """
-    def addArrow(self, x_pos, y_pos, arrow_type):
-        self.addChild({'name': 'Arrow' + str(self.num), 'type': 'group', 'children': [
-            {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
-            {'name': 'Y-Position', 'type': 'int', 'value': y_pos, 'readonly': True},
-            {'name': 'Type', 'type': 'int', 'value': arrow_type, 'readonly': True}
-        ]})
-        self.num += 1
-        return self.num - 1
-
-    def restoreArrow(self, x_pos, y_pos, num, arrow_type):
-        self.addChild({'name': 'Arrow' + str(num), 'type': 'group', 'children': [
-            {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
-            {'name': 'Y-Position', 'type': 'int', 'value': y_pos, 'readonly': True},
-            {'name': 'Type', 'type': 'int', 'value': arrow_type, 'readonly': True}
-        ]})
-        self.num = num + 1
-
-    def removeArrow(self, name):
-        child = self.children()
-        for c in child:
-            if c.name() == name:
-                self.removeChild(c) 
-
-    # 화살표 parameter를 모두 지움.
-    def removeArrowAll(self):
-        self.clearChildren()
-
-class ScrollPopup(QtGui.QWidget):
-    def __init__(self, ui):
-        QtGui.QWidget.__init__(self)
-        self.ui = ui
-        self.initUI()
-
-    def initUI(self):
-        self.text1 = QtGui.QLabel(QtCore.QString('Speed: '), self)
-
-        self.unit = QtGui.QComboBox(self)
-        self.unit.addItem('sec')
-        self.unit.addItem('ms')
-
-        if(self.ui.velocity > 1):
-            self.velocity = QtGui.QLineEdit(QtCore.QString(str(self.ui.velocity)), self)
-            self.unit.setCurrentIndex(0)
-        else:
-            self.velocity = QtGui.QLineEdit(QtCore.QString(str(self.ui.velocity*1000)), self)
-            self.unit.setCurrentIndex(1)
-
-        self.text3 = QtGui.QLabel(QtCore.QString('Level to Scroll: '), self)
-        self.scroll_level = QtGui.QComboBox(self)
-        self.scroll_level.addItem('1')
-        self.scroll_level.addItem('2')
-        self.scroll_level.addItem('3')
-        self.scroll_level.addItem('4')
-        self.scroll_level.addItem('5')
-        self.scroll_level.addItem('6')
-        self.scroll_level.addItem('7')
-        self.scroll_level.addItem('8')
-        self.scroll_level.setCurrentIndex(self.ui.scroll_level-1)
-
-        self.ok = QtGui.QPushButton('OK', self)
-        self.cancel = QtGui.QPushButton('Cancel', self)
-
-        self.text1.move(30, 15)
-        self.velocity.move(90, 15)
-        self.unit.move(240, 15)
-
-        self.text3.move(30, 60)
-        self.scroll_level.move(130, 60)
-
-        self.ok.move(60, 105)
-        self.cancel.move(150, 105)
-
-        self.ok.clicked.connect(self.okPushed)
-        self.cancel.clicked.connect(self.cancelPushed)
-
-        self.setGeometry(QtCore.QRect(100, 100, 300, 130))
-        self.show()
-
-    def okPushed(self):
-        self.ui.velocity = float(self.velocity.text())
-        self.ui.scroll_level = self.scroll_level.currentIndex() + 1
-
-        if(self.unit.currentIndex()==1):
-            self.ui.velocity/=1000
-
-        self.close()
-
-    def cancelPushed(self):
-        self.close()
-
-class MyTreeWidget(ParameterTree):
-    def __init__(self, parent = None):
-        super(MyTreeWidget, self).__init__(parent)
-        self.setDragEnabled(True)
-        self.setAcceptDrops(True)
-        self.setHeaderLabels(["Parameter"])
-        self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-    
-        self.actionRemove = QtGui.QAction('remove', self)
-        self.actionRemoveAll = QtGui.QAction('remove all', self)
-        
-        self.actionRemove.triggered.connect(self.remove)
-        self.actionRemoveAll.triggered.connect(self.remove_all)
-
-        self.popMenu = QtGui.QMenu(self)
-        self.popMenu.addAction(self.actionRemove)
-        self.popMenu.addAction(self.actionRemoveAll)
-
-        # ROI
-        self.actionRemoveROI = QtGui.QAction('remove', self)
-        self.actionRemoveROIAll = QtGui.QAction('remove all', self)
-        
-        self.actionRemoveROI.triggered.connect(self.removeROI)
-        self.actionRemoveROIAll.triggered.connect(self.removeROI_all)
-
-        self.popMenuROI = QtGui.QMenu(self)
-        self.popMenuROI.addAction(self.actionRemoveROI)
-        self.popMenuROI.addAction(self.actionRemoveROIAll)
-
-
-        #self.main_window = main_window
-
-    def mouseDoubleClickEvent(self, event):
-        super(MyTreeWidget, self).mouseDoubleClickEvent(event)
-        name = super(MyTreeWidget, self).itemAt(event.pos()).text(0)
-        if event.button() == QtCore.Qt.LeftButton:
-            if name == "X-Position" or name == "Y-Position" or name == "Type" or name == "Shape":
-                self.main_window.parameterScroll(super(MyTreeWidget,self).itemAt(event.pos()).parent().text(0))
-
-    def mousePressEvent(self, event):
-        super(MyTreeWidget, self).mousePressEvent(event)
-
-        if event.button() == QtCore.Qt.RightButton:
-            if super(MyTreeWidget, self).itemAt(event.pos()).text(0) == "Arrow":
-                pass
-            elif super(MyTreeWidget, self).itemAt(event.pos()).text(0).contains("Arrow"):
-                self.pos = event.pos()
-                self.popMenu.exec_(event.globalPos())   
-            elif super(MyTreeWidget, self).itemAt(event.pos()).text(0) == "ROI":
-                pass
-            elif super(MyTreeWidget, self).itemAt(event.pos()).text(0).contains("ROI"):
-                self.pos = event.pos()
-                self.popMenuROI.exec_(event.globalPos())    
-
-    def remove(self, arrow_name):
-        self.main_window.removeArrow(super(MyTreeWidget, self).itemAt(self.pos))
-        #super(MyTreeWidget, self).itemAt(self.pos).parent().removeChild(super(MyTreeWidget, self).itemAt(self.pos))
-
-    def remove_all(self):
-        self.main_window.removeArrowAll()
-
-    # ROI
-    def removeROI(self):
-        self.main_window.removeROIByItem(super(MyTreeWidget, self).itemAt(self.pos))
-
-    def removeROI_all(self):
-        self.main_window.removeROIAll()
-
-    def setMainWindow(self, main):
-        self.main_window = main
-
 class Window(QtGui.QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
@@ -1189,40 +1017,6 @@ class Window(QtGui.QMainWindow):
     def closeEvent(self, event):
         self.ui.save_setting()
 
-class ROIParameter(pTypes.GroupParameter):
-    '''Control Panel에 ROI를 추가/제거하기 위한 클래스이다.'''
-    
-    def __init__(self, **opts):
-        opts['type'] = 'group'
-        pTypes.GroupParameter.__init__(self, **opts)
-        self.roi_num = 0
-        self.toshape = ['Line', 'Rectangle', 'W', 'M', 'Triangle', 'Ellipse']
-    
-    def addROI(self, x_pos, shape):
-        '''ROI의 위치와 모양 정보를 Control Panel에 추가하는 메서드이다.'''
-
-        self.addChild({'name': 'ROI' + str(self.roi_num), 'type': 'group', 'children': [
-            {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
-            {'name': 'Shape', 'type': 'str', 'value': self.toshape[shape], 'readonly': True}
-        ]})
-        self.roi_num += 1
-        return self.roi_num - 1
-       
-    def restoreROI(self, x_pos, num, shape):
-        '''OPEN 시에 ROI의 정보를 복원하는 메서드이다.'''
-        self.addChild({'name': 'ROI' + str(num), 'type': 'group', 'children': [
-            {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},
-            {'name': 'Shape', 'type': 'str', 'value': self.toshape[shape], 'readonly': True}
-        ]})
-        self.roi_num = num + 1
-    
-    def removeROI(self, name):
-        for child in self.children():
-            if child.name() == name:
-                self.removeChild(child) 
-
-    def removeROIAll(self):
-        self.clearChildren()
 
 if __name__ == "__main__":
     import sys

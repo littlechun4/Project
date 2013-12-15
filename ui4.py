@@ -13,10 +13,11 @@ import pandas as pd
 import pyqtgraph as pg
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from CustomGraph import CustomGraph, CustomAxis
-from bisect import bisect_right
+from bisect import bisect_left, bisect_right
 import time
 from datetime import datetime
 import BG_Popup
+import Data_Popup
 from pyqtgraph import PlotWidget
 from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
 
@@ -89,6 +90,8 @@ class Ui_MainWindow(object):
 		self.menuInsert.setObjectName(_fromUtf8("menuInsert"))
 		self.menuBG_Fill = QtGui.QMenu(self.menubar)
 		self.menuBG_Fill.setObjectName(_fromUtf8("menuBG_Fill"))
+		self.menuData = QtGui.QMenu(self.menubar)
+		self.menuData.setObjectName(_fromUtf8("menuData"))
 		MainWindow.setMenuBar(self.menubar)
 		self.toolBar = QtGui.QToolBar(MainWindow)
 		self.toolBar.setObjectName(_fromUtf8("toolBar"))
@@ -183,6 +186,8 @@ class Ui_MainWindow(object):
 		self.action8_2.setObjectName(_fromUtf8("action8_2"))
 		self.actionBG_Fill = QtGui.QAction(MainWindow)
 		self.actionBG_Fill.setObjectName(_fromUtf8("actionBG_Fill"))
+		self.actionMax_Min = QtGui.QAction(MainWindow)
+		self.actionMax_Min.setObjectName(_fromUtf8("actionMax_Min"))
 		self.menuMenu.addAction(self.actionFile)
 		self.menuMenu.addAction(self.actionSave)
 		self.menuMenu.addAction(self.actionSave_as)
@@ -217,12 +222,14 @@ class Ui_MainWindow(object):
 		self.menuArrow.addAction(self.menuInsert.menuAction())
 		self.menuArrow.addAction(self.actionRemove_All_2)
 		self.menuBG_Fill.addAction(self.actionBG_Fill)
+		self.menuData.addAction(self.actionMax_Min)
 		self.menubar.addAction(self.menuMenu.menuAction())
 		self.menubar.addAction(self.menuLayout.menuAction())
 		self.menubar.addAction(self.menuScroll.menuAction())
 		self.menubar.addAction(self.menuROI.menuAction())
 		self.menubar.addAction(self.menuArrow.menuAction())
 		self.menubar.addAction(self.menuBG_Fill.menuAction())
+		self.menubar.addAction(self.menuData.menuAction())
 		self.toolBar.addAction(self.actionFile)
 		self.toolBar.addAction(self.actionSave)
 		self.toolBar.addAction(self.actionSave_as)
@@ -299,6 +306,7 @@ class Ui_MainWindow(object):
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 		self.restore(MainWindow)
 
+		self.actionMax_Min.triggered.connect(self.data_stat)
 		"""
 	
 		"""
@@ -316,6 +324,7 @@ class Ui_MainWindow(object):
 		self.menuArrow.setTitle(QtGui.QApplication.translate("MainWindow", "Arrow", None, QtGui.QApplication.UnicodeUTF8))
 		self.menuInsert.setTitle(QtGui.QApplication.translate("MainWindow", "Insert", None, QtGui.QApplication.UnicodeUTF8))
 		self.menuBG_Fill.setTitle(QtGui.QApplication.translate("MainWindow", "BG Fill", None, QtGui.QApplication.UnicodeUTF8))
+		self.menuData.setTitle(QtGui.QApplication.translate("MainWindow", "Data", None, QtGui.QApplication.UnicodeUTF8))
 		self.actionFile.setText(QtGui.QApplication.translate("MainWindow", "Open", None, QtGui.QApplication.UnicodeUTF8))
 		self.action12.setText(QtGui.QApplication.translate("MainWindow", "12", None, QtGui.QApplication.UnicodeUTF8))
 		self.action1.setText(QtGui.QApplication.translate("MainWindow", "1", None, QtGui.QApplication.UnicodeUTF8))
@@ -355,6 +364,7 @@ class Ui_MainWindow(object):
 		self.action7_2.setText(QtGui.QApplication.translate("MainWindow", "7", None, QtGui.QApplication.UnicodeUTF8))
 		self.action8_2.setText(QtGui.QApplication.translate("MainWindow", "8", None, QtGui.QApplication.UnicodeUTF8))
 		self.actionBG_Fill.setText(QtGui.QApplication.translate("MainWindow", "BG_Fill", None, QtGui.QApplication.UnicodeUTF8))
+		self.actionMax_Min.setText(QtGui.QApplication.translate("MainWindow", "Max_Min", None, QtGui.QApplication.UnicodeUTF8))
 
 
 	def setSize(self, MainWindow):			# 저장된 설정 파일이 없을 때 최초로 ui 크기를 설정해 주는 함수
@@ -721,6 +731,26 @@ class Ui_MainWindow(object):
 			widget.addItem(rect)
 			self.bg_rect_lst.append(rect)
 	
+	def data_stat(self):
+		max_lst = []
+		min_lst = []
+		widget_lst = self.plotwidget_lst
+		widget_lst.reverse()
+		for widget in widget_lst[0:self.num]:
+			x1, x2 = widget.getViewBox().viewRange()[0]
+			x_start = bisect_right(self.times, x1)
+			x_end = bisect_left(self.times, x2)
+
+			if x_start < x_end:
+				max_lst.append(max(self.lst[x_start:x_end]))
+				min_lst.append(min(self.lst[x_start:x_end]))
+			else:
+				max_lst.append('empty')
+				min_lst.append('empty')
+		
+		values = {'max': max_lst, 'min': min_lst}
+		ds = Data_Popup.DataStat_Dialog(values)
+		
 class ArrowParameter(pTypes.GroupParameter):
 	""" 
 	화살표를 위한 별도의 parameter 클래스이다.

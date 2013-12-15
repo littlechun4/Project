@@ -746,6 +746,16 @@ class Ui_MainWindow(object):
         #self.w.setGeometry(QtCore.QRect(100, 100, 400, 400))
         #self.w.show()
 
+    def parameterScroll(self, param_name):
+        if param_name.contains('Arrow'):
+            num = param_name.split('Arrow')[1]
+        else:
+            num = param_name.split('ROI')[1]
+
+        for arrow_setting in self.arrow_setting_lst:
+            if arrow_setting['num'] == int(num):
+                self.graph.parameterScroll(arrow_setting['x'], self.plotwidget_lst)
+
     def bg_fill(self):
         self.bg = BG_Popup.BGFill_Dialog(self.times[0])
         value = self.bg.activate()
@@ -916,6 +926,10 @@ class MyTreeWidget(ParameterTree):
 
     def mouseDoubleClickEvent(self, event):
         super(MyTreeWidget, self).mouseDoubleClickEvent(event)
+        name = super(MyTreeWidget, self).itemAt(event.pos()).text(0)
+        if event.button() == QtCore.Qt.LeftButton:
+            if name == "X-Position" or name == "Y-Position" or name == "Type" or name == "Shape":
+                self.main_window.parameterScroll(super(MyTreeWidget,self).itemAt(event.pos()).parent().text(0))
 
     def mousePressEvent(self, event):
         super(MyTreeWidget, self).mousePressEvent(event)

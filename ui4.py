@@ -781,13 +781,20 @@ class Ui_MainWindow(object):
 
     def parameterScroll(self, param_name):
         if param_name.contains('Arrow'):
+            arrow = True
             num = param_name.split('Arrow')[1]
         else:
+            arrow = False
             num = param_name.split('ROI')[1]
 
-        for arrow_setting in self.arrow_setting_lst:
-            if arrow_setting['num'] == int(num):
-                self.graph.parameterScroll(arrow_setting['x'], self.plotwidget_lst)
+        if arrow:
+            for arrow_setting in self.arrow_setting_lst:
+                if arrow_setting['num'] == int(num):
+                    self.graph.parameterScroll(arrow_setting['x'], self.plotwidget_lst)
+        else:
+            for roi_setting in self.roi_setting_lst:
+                if roi_setting['num'] == int(num):
+                    self.graph.parameterScroll(roi_setting['x'], self.plotwidget_lst)
 
     def bg_fill(self):
         self.bg = BG_Popup.BGFill_Dialog(self.times[0])

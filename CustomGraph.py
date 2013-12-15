@@ -257,7 +257,7 @@ class CustomGraph(pg.GraphicsObject):
         g_start = widget.getViewBox().viewRange()[0][0]
         g_end = widget.getViewBox().viewRange()[0][1]
 
-        one_step = vel
+        one_step = vel*250
 
         new_region = [self.region_lst[8-level].getRegion()[0] + one_step, self.region_lst[8-level].getRegion()[1] + one_step]
 

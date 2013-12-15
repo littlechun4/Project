@@ -282,6 +282,24 @@ class CustomGraph(pg.GraphicsObject):
         self.region_lst[8-level].setRegion(new_region)
         return True
 
+    # Triggered when ROI double clicked
+    def ROI_scroll(self, target_x, widget_lst):
+
+        if(pre_empt == 1):
+            return
+
+        pre_empt = 1
+
+        #target_x(ROI의 좌표)가 가운데로 올 수 있도록 각 레벨의 Region과 XRange를 조정한다.
+        for i in range(7, -1, -1):
+            region_mid = (region_lst[i].getRegion()[0] + region_lst[i].getRegion()[1])/2
+            region_lst[i].setRegion([region_lst[i].getRegion()[0] + (target_x - region_mid), region_lst[i].getRegion()[1] + (target_x - region_mid)])
+
+            #Last 
+            if(i != 0):
+                widget_lst[i-1].setXRange(*region_lst[i].getRegion(), padding=0)
+
+
 class CustomAxis(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):
         strns = []

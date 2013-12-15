@@ -224,10 +224,10 @@ class CustomGraph(pg.GraphicsObject):
                 cur_region = self.region_lst[level].getRegion()
                 self.old_region_lst[level][0] = cur_region[0]
                 self.old_region_lst[level][1] = cur_region[1]
-                #X레인지 변환
+                #Region에 맞게 X레인지 변환
                 widget_lst[next_level].setXRange(*cur_region, padding=0)
                 new_xrange = [widget_lst[next_level].getViewBox().viewRange()[0][0], widget_lst[next_level].getViewBox().viewRange()[0][1]]
-                #Y레인지 변환
+                #범위에 맞게 Y레인지 변환
                 lst_range = getListRange(new_xrange[0], new_xrange[1], self.times)
                 new_data = self.data[lst_range[0]:lst_range[1]+1]
           
@@ -295,9 +295,20 @@ class CustomGraph(pg.GraphicsObject):
             region_mid = (self.region_lst[i].getRegion()[0] + self.region_lst[i].getRegion()[1])/2
             self.region_lst[i].setRegion([self.region_lst[i].getRegion()[0] + (target_x - region_mid), self.region_lst[i].getRegion()[1] + (target_x - region_mid)])
 
-            #Last 
+            #최상위 레벨의 경우 XRange를 변환시키지 않음!
             if(i != 0):
+                #Region에 맞게 X레인지 변환
                 widget_lst[i-1].setXRange(*self.region_lst[i].getRegion(), padding=0)
+                new_xrange = [widget_lst[i-1].getViewBox().viewRange()[0][0], widget_lst[i-1].getViewBox().viewRange()[0][1]]
+                #범위에 맞게 Y레인지 변환
+                lst_range = getListRange(new_xrange[0], new_xrange[1], self.times)
+                new_data = self.data[lst_range[0]:lst_range[1]+1]
+          
+                self.y_min = min(new_data)
+                self.y_max = max(new_data)
+
+                widget_lst[i-1].setYRange(self.y_min, self.y_max, padding=0, update=True)
+
 
         self.pre_empt = 0
 

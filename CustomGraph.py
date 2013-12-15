@@ -77,6 +77,9 @@ class CustomGraph(pg.GraphicsObject):
         #y's autorage level
         self.autorange = 1
 
+        #widget_lst저장
+        self.widget_lst = widget_lst
+
         pg.GraphicsObject.__init__(self)
         self.region_lst = []
         self.old_region_lst = []
@@ -241,16 +244,22 @@ class CustomGraph(pg.GraphicsObject):
         region.setRegion(connect_graph.getViewBox().viewRange()[0])
 
     def restoreRegion(self, width_lst):
-        width_region_lst = zip(width_lst, self.region_lst)
+        '''
+        파일의 정보에 따라 Region을 복구한다.
+        '''
 
-        for (width, region) in width_region_lst:
-            region.setRegion(width)
+        for i in range(7, 0, -1):
+            self.region_lst[i].setRegion(width_lst[i])
+            if(i != 0):
+                self.widget_lst[i-1].setXRange(*width_lst[i], padding=0)
 
     
     def scroll(self, widget, level, vel, curve_arrow):
-        ''' Scroll을 처리한다.
+        '''
+        Scroll을 처리한다.
         타이머에 의해 250ms마다 한번씩 호출됨
-        level = 1 ~ 8'''
+        level = 1 ~ 8
+        '''
         #시작, 끝의 범위를 지정한다.
         g_start = widget.getViewBox().viewRange()[0][0]
         g_end = widget.getViewBox().viewRange()[0][1]

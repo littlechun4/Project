@@ -520,6 +520,8 @@ class Window(QtGui.QMainWindow):
         self.ui.setupUi(self)
     
     def keyPressEvent(self, event):
+
+        #Scroll mapping keys
         if (event.key()==QtCore.Qt.Key_Q):
             self.ui.startScroll()
 
@@ -531,6 +533,20 @@ class Window(QtGui.QMainWindow):
 
         elif(event.key()==QtCore.Qt.Key_R):
             self.ui.stopScroll()
+        
+        elif(event.key()==QtCore.Qt.Key_Up):
+            self.ui.velocity *= 1.25
+        
+        elif(event.key()==QtCore.Qt.Key_Down):
+            self.ui.velocity /= 0.8
+        elif(event.key()==QtCore.Qt.Key_Left):
+            if(self.ui.scroll_active == False):
+                self.ui.graph.scroll(self.ui.plotwidget_lst[8-self.ui.scroll_level], self.ui.scroll_level, -1*self.ui.velocity, self.ui.curve_arrow)
+        elif(event.key()==QtCore.Qt.Key_Right):
+            if(self.ui.scroll_active == False):
+                self.ui.graph.scroll(self.ui.plotwidget_lst[8-self.ui.scroll_level], self.ui.scroll_level, self.ui.velocity, self.ui.curve_arrow)
+
+
 
         # Arrow Mapping Keys - Insert your code Here!
         elif(event.key()==QtCore.Qt.Key_4):

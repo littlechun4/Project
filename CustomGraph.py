@@ -270,7 +270,8 @@ class CustomGraph(pg.GraphicsObject):
         #new_pos = ((new_region[0] + new_region[1])/2 - g_start)/(g_end - g_start)
         region_mid = (new_region[0] + new_region[1])/2
         new_index = bisect_left(self.times, region_mid)
-        curve_arrow.setIndex(new_index)
+        if(curve_arrow != 0):
+            curve_arrow.setIndex(new_index)
         #print(new_pos)
 #       if (new_region[1] > g_end):
 #           new_region[0] = g_end - (self.region_lst[8-level].getRegion()[1] - self.region_lst[8-level].getRegion()[0])

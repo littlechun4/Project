@@ -392,9 +392,9 @@ class Ui_MainWindow(object):
 		name = fname.split("/") 
 		self.file_name = name[len(name)-1]
 
-		if name[len(name)-1] == 'synth.csv': 
-			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value'])
-			rd2 = pd.read_csv('./synth.csv', header=None, names=['dt', ''])
+		if name[len(name)-1][-4:] == '.csv': 
+			rd = pd.read_csv(str(fname), index_col=[0], header=None, names=['dt', 'value'])
+			rd2 = pd.read_csv(str(fname), header=None, names=['dt', ''])
 
 			self.times = []
 			self.lst = [] 
@@ -431,6 +431,7 @@ class Ui_MainWindow(object):
 			self.arrow_setting_lst = []
 
 		elif name[len(name)-1].split(".")[1] == "st":
+			self.fname = fname
 			f = open(name[len(name)-1], 'r')
 			settings = pickle.load(f)
 			f.close()
@@ -441,9 +442,9 @@ class Ui_MainWindow(object):
 			self.graphWindow(settings['graph_num'])
 			self.splitter_2.setSizes(settings['graph'])
 
-			graph_file = './' + settings['file_name']
-			rd = pd.read_csv('./synth.csv', index_col=[0], header=None, names=['dt', 'value'])
-			rd2 = pd.read_csv('./synth.csv', header=None, names=['dt', ''])
+			#graph_file = './' + settings['file_name']
+			rd = pd.read_csv(str(settings['file_name']), index_col=[0], header=None, names=['dt', 'value'])
+			rd2 = pd.read_csv(str(settings['file_name']), header=None, names=['dt', ''])
 
 			self.times = []
 			self.lst = [] 

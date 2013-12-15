@@ -563,6 +563,7 @@ class Ui_MainWindow(object):
         
         region_width_lst = []           # 파일 이름 및 Region 저장
         for region in self.graph.region_lst:
+            print region.getRegion()
             region_width_lst.append(region.getRegion())
         
         main_setting = self.splitter_3.sizes()
@@ -585,7 +586,7 @@ class Ui_MainWindow(object):
     최초로 save할 때와 같은 함수 내용을 사용한다.
     """
     def save_as(self):
-        self.fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file As', '~/')
+        self.fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file As', '~/') + ".st"
         name = self.fname.split("/")
         
         region_width_lst = []           # 파일 이름 및 Region 저장
@@ -603,7 +604,7 @@ class Ui_MainWindow(object):
 
         settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst, 'roi': self.roi_setting_lst}
 
-        f = open(name[len(name)-1] + ".st", 'w+')
+        f = open(name[len(name)-1], 'w+')
         pickle.dump(settings, f)
         f.close()
         

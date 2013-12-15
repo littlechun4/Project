@@ -722,6 +722,7 @@ class Ui_MainWindow(object):
                 widget.removeItem(arrow)
 
         self.arrow_lst = []
+        self.arrow_setting_lst = []
         self.arrowParameter.removeArrowAll()
     
     timer = 0

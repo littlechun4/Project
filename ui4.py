@@ -13,6 +13,7 @@ import pickle
 import pandas as pd
 from CustomGraph import CustomGraph, CustomAxis
 import time
+import pyqtgraph as pg
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -377,40 +378,65 @@ class Ui_MainWindow(object):
         
         except IOError:
             self.setSize()
-
+    
+    scroll_active = False
     timer = 0
     velocity = 10
     scroll_level = 1
+    curve_arrow = 0
 
     def scrollEvent(self):
-        cont = self.graph.scroll(self.plotwidget_lst[8-self.scroll_level], self.scroll_level, self.velocity)
+        cont = self.graph.scroll(self.plotwidget_lst[8-self.scroll_level], self.scroll_level, self.velocity, self.curve_arrow)
         if cont == False:
             print('Out of Bonud!')
-            self.timer.stop()
+            self.pauseScroll()
 
     def startScroll(self):
-        try:
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(self.scrollEvent)
-            self.timer.start(250)
-        except:
-            print('Error!')
+        
+        if(self.timer!=0):
+            return
+        
+        cur_viewrange = self.plotwidget_lst[8-self.scroll_level].getViewBox().viewRange()[0]
+        cur_region = self.graph.region_lst[8-self.scroll_level].getRegion()
+        cur_pos = (((cur_region[0] + cur_region[1])/2) - cur_viewrange[0]) / (cur_viewrange[1] - cur_viewrange[0])
+        print cur_pos
+        self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8-self.scroll_level].getPlotItem().listDataItems()[0], pos=cur_pos)
+        #self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8-self.scroll_level].getPlotItem(), pos=0.5)
+        self.plotwidget_lst[8-self.scroll_level].addItem(self.curve_arrow)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.scrollEvent)
+        self.scroll_active = True
+        self.timer.start(250)
 
     def pauseScroll(self):
         try:
+            if(self.scroll_active != True):
+                return
+            self.scroll_active = False
             self.timer.stop()
         except:
             print('Error!')
 
     def resumeScroll(self):
         try:
+            if(self.scroll_active != False):
+                return
             self.timer.start(250)
+            self.scroll_active = True
         except:
             print('Error!')
 
     def stopScroll(self):
         try:
             del self.timer
+            self.timer = 0
+
+            self.plotwidget_lst[8-self.scroll_level].removeItem(self.curve_arrow)
+            del self.curve_arrow
+            self.curve_arrow = 0
+            self.cur_pos = 0
+
+            self.scroll_active = False
         except:
             print('Error!')
 
@@ -491,8 +517,6 @@ class Window(QtGui.QMainWindow):
         self.ui.setupUi(self)
     
     def keyPressEvent(self, event):
-
-        print('hi!')
         if (event.key()==QtCore.Qt.Key_Q):
             self.ui.startScroll()
 

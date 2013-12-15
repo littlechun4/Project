@@ -160,6 +160,9 @@ class CustomGraph(pg.GraphicsObject):
     # loop로 동작하여 모든 level의 그래프를 업데이트함
     def updatePlot(self, level, widget_lst):
         
+        #Next curvearrow's pos
+        next_pos = 0
+
         #lock이 걸려있으면 동작하지 않음
         if (self.pre_empt == 1):
             return
@@ -235,6 +238,7 @@ class CustomGraph(pg.GraphicsObject):
 
         #lock off
         self.pre_empt = 0
+        return next_pos
 
     def updateRegion(self, region, connect_graph):
         region.setRegion(connect_graph.getViewBox().viewRange()[0])
@@ -249,7 +253,7 @@ class CustomGraph(pg.GraphicsObject):
     # operace once per 50ms
     # level = 1 ~ 8
 
-    def scroll(self, widget, level, vel):
+    def scroll(self, widget, level, vel, curve_arrow):
 
         g_start = widget.getViewBox().viewRange()[0][0]
         g_end = widget.getViewBox().viewRange()[0][1]
@@ -259,6 +263,9 @@ class CustomGraph(pg.GraphicsObject):
 
         new_region = [self.region_lst[8-level].getRegion()[0] + one_step, self.region_lst[8-level].getRegion()[1] + one_step]
 
+        new_pos = ((new_region[0] + new_region[1])/2 - g_start)/(g_end - g_start) 
+        curve_arrow.setPos(new_pos)
+        print(new_pos)
 #       if (new_region[1] > g_end):
 #           new_region[0] = g_end - (self.region_lst[8-level].getRegion()[1] - self.region_lst[8-level].getRegion()[0])
 #           new_region[1] = g_end

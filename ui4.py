@@ -557,7 +557,7 @@ class Ui_MainWindow(object):
         if self.fname is not "":
             pass            
         else:
-            self.fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/')
+            self.fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/') + ".st"
 
         name = self.fname.split("/")
         
@@ -576,7 +576,7 @@ class Ui_MainWindow(object):
 
         settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst, 'roi': self.roi_setting_lst}
 
-        f = open(name[len(name)-1] + ".st", 'w+')
+        f = open(name[len(name)-1], 'w+')
         pickle.dump(settings, f)
         f.close()
         

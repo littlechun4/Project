@@ -780,48 +780,61 @@ class Ui_MainWindow(object):
 
     def scrollEvent(self):
         """
-        스크롤 시 타이머에 의해 호출되어 그래프를 스크롤하는 함수
+        자동스크롤 시 타이머에 의해 호출되어 그래프를 스크롤한다
         """
         cont = self.graph.scroll(self.plotwidget_lst[8-self.scroll_level], self.scroll_level, self.velocity, self.curve_arrow)
         
-        #자동스크롤 시 화면 범위를 넘어가면 콘솔에 메세지를 출력하고 스크롤이 중단됨
+        #자동스크롤 시 화면 범위를 넘어가면 콘솔에 메세지를 출력하고 스크롤이 중단함
         if cont == False:
             print('Out of Bonud!')
             self.pauseScroll()
     
     def startScroll(self):    
         """
-
+        자동스크롤을 시작한다
         """
+
+        #스크롤이 Stop상태가 아니면 동작하지 않음
         if(self.timer!=0):
             return
         
+        #CurveArrow의 위치를 계산
         cur_viewrange = self.plotwidget_lst[8-self.scroll_level].getViewBox().viewRange()[0]
         cur_region = self.graph.region_lst[8-self.scroll_level].getRegion()
-        #cur_pos = (((cur_region[0] + cur_region[1])/2) - cur_viewrange[0]) / (cur_viewrange[1] - cur_viewrange[0])
         cur_region_mid = (cur_region[0] + cur_region[1])/2
         cur_index = bisect_left(self.graph.times, cur_region_mid)
-        #print cur_pos
+
+        #CurveArrow를 추가해줌
         self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8-self.scroll_level].getPlotItem().listDataItems()[0], index=cur_index)
-        #self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8-self.scroll_level].getPlotItem(), pos=0.5)
         self.plotwidget_lst[8-self.scroll_level].addItem(self.curve_arrow)
+
+        #타이머 오브젝트 생성
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.scrollEvent)
         self.scroll_active = True
         self.timer.start(250)
 
     def pauseScroll(self):
+        """
+        자동스크롤을 일시정지시킨다
+        """
         try:
+            #현재 스크롤 하고 있지 않으면 아무일도 하지 않음
             if(self.scroll_active != True):
                 return
             self.scroll_active = False
+            #타이머를 일시 정지시킴
             self.timer.stop()
 
         except:
             print('Error!')
 
     def resumeScroll(self):
+        """
+        일시정지 되어있던 자동스크롤을 다시 시작한다
+        """
         try:
+            #현재 스크롤이 멈춰있지 않으면 아무일도 하지 않음
             if(self.scroll_active != False):
                 return
             self.timer.start(250)
@@ -830,25 +843,35 @@ class Ui_MainWindow(object):
             print('Error!')
 
     def stopScroll(self):
+        """
+        자동 스크롤을 완전히 멈춘다
+        """
         try:
+            #timer 오브젝트 제거
             del self.timer
             self.timer = 0
 
+            #CurveArrow제거
             self.plotwidget_lst[8-self.scroll_level].removeItem(self.curve_arrow)
             del self.curve_arrow
             self.curve_arrow = 0
-            self.cur_pos = 0
 
             self.scroll_active = False
         except:
             print('Error!')
 
     def optionScroll(self):
+        """
+        스크롤 팝업창을 띄운다.
+        """
         self.w = ScrollPopup(self)
         #self.w.setGeometry(QtCore.QRect(100, 100, 400, 400))
         #self.w.show()
 
     def parameterScroll(self, param_name):
+        """
+        더블클릭한 Arrow나 ROI로 리젼을 이동한다
+        """
         if param_name.contains('Arrow'):
             arrow = True
             num = param_name.split('Arrow')[1]
@@ -1021,27 +1044,42 @@ class Window(QtGui.QMainWindow):
         self.ui.setupUi(self)
     
     def keyPressEvent(self, event):
+        """
+        메인 윈도우의 키 입력을 처리한다
+        """
+
         #Scroll mapping keys
+
+        #Q -> 스크롤 시작
         if (event.key()==QtCore.Qt.Key_Q):
             self.ui.startScroll()
-
+        
+        #W -> 스크롤 일시 정지
         elif(event.key()==QtCore.Qt.Key_W):
             self.ui.pauseScroll()
 
+        #E -> 스크롤 재시작
         elif(event.key()==QtCore.Qt.Key_E):
             self.ui.resumeScroll()
 
+        #R -> 스크롤 정지
         elif(event.key()==QtCore.Qt.Key_R):
             self.ui.stopScroll()
         
+        #Up -> 스크롤 속도 증가
         elif(event.key()==QtCore.Qt.Key_Up):
             self.ui.velocity *= 1.25
         
+        #Down -> 스크롤 속도 감소
         elif(event.key()==QtCore.Qt.Key_Down):
             self.ui.velocity *= 0.8
+
+        #Left -> 자동 스크롤 되지 않을 때 왼쪽으로 수동 스크롤(1/4 velocity만큼) 
         elif(event.key()==QtCore.Qt.Key_Left):
             if(self.ui.scroll_active == False):
                 self.ui.graph.scroll(self.ui.plotwidget_lst[8-self.ui.scroll_level], self.ui.scroll_level, -1*self.ui.velocity, self.ui.curve_arrow)
+        
+        #Right -> 자동 스크롤 되지 않을 때 오른쪽으로 수동 스크롤
         elif(event.key()==QtCore.Qt.Key_Right):
             if(self.ui.scroll_active == False):
                 self.ui.graph.scroll(self.ui.plotwidget_lst[8-self.ui.scroll_level], self.ui.scroll_level, self.ui.velocity, self.ui.curve_arrow)

@@ -8,63 +8,66 @@ import time
 from bisect import bisect_left
 from pyqtgraph import QtCore, QtGui
 
+class CustomGraph(pg.GraphicsObject):      
 
-def getListRange(start, end, lst):
-    '''정렬된 타임스탬프의 레인지를 입력받아 그 인덱스의 레인지를 출력해주는 코드'''
+    def getListRange(self, start, end, lst):
+        '''
+        정렬된 타임스탬프의 레인지를 입력받아 그 인덱스의 레인지를 출력해주는 코드
+        '''
 
-    m = 0
-    n = len(lst)-1
+        m = 0
+        n = len(lst)-1
 
-    while (m <= n):
+        while (m <= n):
         
-        if(lst[m] == start):
-            s = m
-            break
-        elif(lst[n] == start):
-            s = n
-            break
+            if(lst[m] == start):
+                s = m
+                break
+            elif(lst[n] == start):
+                s = n
+                break
 
-        if (m+1 == n):
-            s = m
-            break
+            if (m+1 == n):
+                s = m
+                break
 
-        l = int((m+n)/2)
-        if(lst[l] > start):
-            n = l
-        elif(lst[l] < start):
-            m = l
-        else:
-            s = l
-            break
+            l = int((m+n)/2)
+            if(lst[l] > start):
+                n = l
+            elif(lst[l] < start):
+                m = l
+            else:
+                s = l
+                break
 
-    m = 0
-    n = len(lst)-1
+        m = 0
+        n = len(lst)-1
 
-    while (m <= n):
+        while (m <= n):
 
-        if(lst[n] == end):
-            e = n
-            break
-        elif(lst[m] == end):
-            e = m
-            break
+            if(lst[n] == end):
+                e = n
+                break
+            elif(lst[m] == end):
+                e = m
+                break
         
-        if(m+1 == n):
-            e = n
-            break
+            if(m+1 == n):
+                e = n
+                break
 
-        l = int((m+n)/2)
-        if(lst[l] > end):
-            n = l
-        elif(lst[l] < end):
-            m = l
-        else:
-            e = l
-            break
+            l = int((m+n)/2)
+            if(lst[l] > end):
+                n = l
+            elif(lst[l] < end):
+                m = l
+            else:
+                e = l
+                break
 
-    return [s, e]
+        return [s, e]
+  
 
-class CustomGraph(pg.GraphicsObject):       
     def __init__(self, data, widget_lst, times):
 
         #save data, stamp
@@ -92,7 +95,7 @@ class CustomGraph(pg.GraphicsObject):
                 widget_lst[i].setXRange(*self.region_lst[6-i].getRegion(), padding=0)
 
                 #XRange를 포함하는 Data의 index range를 구함
-                lst_range = getListRange(widget_lst[i].getViewBox().viewRange()[0][0], widget_lst[i].getViewBox().viewRange()[0][1], times)
+                lst_range = self.getListRange(widget_lst[i].getViewBox().viewRange()[0][0], widget_lst[i].getViewBox().viewRange()[0][1], times)
                 new_data = data[lst_range[0]:lst_range[1]+1]
 
                 #Min, Max값을 구하고 이에 따른 YRange 설정
@@ -141,24 +144,9 @@ class CustomGraph(pg.GraphicsObject):
         self.region_lst[1].sigRegionChanged.connect(lambda: self.updatePlot(1, widget_lst))
         self.region_lst[0].sigRegionChanged.connect(lambda: self.updatePlot(0, widget_lst))
 
-#       self.region_lst[6].sigRegionChanged.connect(lambda: self.updatePlot(self.region_lst[6], widget_lst[6]))
-#       widget_lst[6].sigXRangeChanged.connect(lambda: self.updateRegion(self.region_lst[6], widget_lst[6]))
-#       self.region_lst[5].sigRegionChanged.connect(lambda: self.updatePlot(self.region_lst[5], widget_lst[5]))
-#       widget_lst[5].sigXRangeChanged.connect(lambda: self.updateRegion(self.region_lst[5], widget_lst[5]))
-#       self.region_lst[4].sigRegionChanged.connect(lambda: self.updatePlot(self.region_lst[4], widget_lst[4]))
-#       widget_lst[4].sigXRangeChanged.connect(lambda: self.updateRegion(self.region_lst[4], widget_lst[4]))
-#       self.region_lst[3].sigRegionChanged.connect(lambda: self.updatePlot(self.region_lst[3], widget_lst[3]))
-#       widget_lst[3].sigXRangeChanged.connect(lambda: self.updateRegion(self.region_lst[3], widget_lst[3]))
-#       self.region_lst[2].sigRegionChanged.connect(lambda: self.updatePlot(self.region_lst[2], widget_lst[2]))
-#       widget_lst[2].sigXRangeChanged.connect(lambda: self.updateRegion(self.region_lst[2], widget_lst[2]))
-#       self.region_lst[1].sigRegionChanged.connect(lambda: self.updatePlot(self.region_lst[1], widget_lst[1]))
-#       widget_lst[1].sigXRangeChanged.connect(lambda: self.updateRegion(self.region_lst[1], widget_lst[1]))
-#       self.region_lst[0].sigRegionChanged.connect(lambda: self.updatePlot(self.region_lst[0], widget_lst[0]))
-#       widget_lst[0].sigXRangeChanged.connect(lambda: self.updateRegion(self.region_lst[0], widget_lst[0]))
-
-
         self.picture = QtGui.QPicture()
-                        
+
+                          
     def paint(self, p, *args):
         p.drawPicture(0, 0, self.picture)
 
@@ -168,7 +156,9 @@ class CustomGraph(pg.GraphicsObject):
     
     def updatePlot(self, level, widget_lst):
 
-        '''하나의 region이 변했을 때 자동으로 불러져서 변경사항을 처리함'''
+        '''
+        하나의 region이 변했을 때 자동으로 불러져서 변경사항을 처리함
+        '''
 
         #lock이 걸려있으면 동작하지 않음
         if (self.pre_empt == 1):
@@ -210,7 +200,7 @@ class CustomGraph(pg.GraphicsObject):
                     widget_lst[next_level].setXRange(*self.region_lst[level].getRegion(), padding=0)
                     new_xrange = [widget_lst[next_level].getViewBox().viewRange()[0][0], widget_lst[next_level].getViewBox().viewRange()[0][1]]
                     #Y레인지 변환
-                    lst_range = getListRange(new_xrange[0], new_xrange[1], self.times)
+                    lst_range = self.getListRange(new_xrange[0], new_xrange[1], self.times)
                     new_data = self.data[lst_range[0]:lst_range[1]+1]
 
                     widget_lst[next_level].setYRange(min(new_data), max(new_data), padding=0, update=True)
@@ -232,16 +222,13 @@ class CustomGraph(pg.GraphicsObject):
                 widget_lst[next_level].setXRange(*cur_region, padding=0)
                 new_xrange = [widget_lst[next_level].getViewBox().viewRange()[0][0], widget_lst[next_level].getViewBox().viewRange()[0][1]]
                 #범위에 맞게 Y레인지 변환
-                lst_range = getListRange(new_xrange[0], new_xrange[1], self.times)
+                lst_range = self.getListRange(new_xrange[0], new_xrange[1], self.times)
                 new_data = self.data[lst_range[0]:lst_range[1]+1]
 
                 widget_lst[next_level].setYRange(min(new_data), max(new_data), padding=0, update=True)
 
         #lock off
         self.pre_empt = 0
-
-    def updateRegion(self, region, connect_graph):
-        region.setRegion(connect_graph.getViewBox().viewRange()[0])
 
     def restoreRegion(self, width_lst):
         '''
@@ -292,7 +279,9 @@ class CustomGraph(pg.GraphicsObject):
         return True
 
     def parameterScroll(self, target_x, widget_lst):
-        '''ROI와 Arrow가 double click되었을 때 대상이 가운데에 오도록 Region과 Xrange를 조정'''
+        '''
+        ROI와 Arrow가 double click되었을 때 대상이 가운데에 오도록 Region과 Xrange를 조정
+        '''
         if(self.pre_empt == 1):
             return
 
@@ -309,7 +298,7 @@ class CustomGraph(pg.GraphicsObject):
                 widget_lst[i-1].setXRange(*self.region_lst[i].getRegion(), padding=0)
                 new_xrange = [widget_lst[i-1].getViewBox().viewRange()[0][0], widget_lst[i-1].getViewBox().viewRange()[0][1]]
                 #범위에 맞게 Y레인지 변환
-                lst_range = getListRange(new_xrange[0], new_xrange[1], self.times)
+                lst_range = self.getListRange(new_xrange[0], new_xrange[1], self.times)
                 new_data = self.data[lst_range[0]:lst_range[1]+1]
 
                 widget_lst[i-1].setYRange(min(new_data), max(new_data), padding=0, update=True)
@@ -318,6 +307,9 @@ class CustomGraph(pg.GraphicsObject):
         self.pre_empt = 0
 
 class CustomAxis(pg.AxisItem):
+    """
+    X축의 단위를 자동으로 변환시켜 주는 CustomAxis
+    """
     def tickStrings(self, values, scale, spacing):
         strns = []
 
@@ -325,6 +317,7 @@ class CustomAxis(pg.AxisItem):
             rng = max(values) - min(values)
             #if rng < 120:
             #    return pg.AxisItem.tickStrings(self, values, scale, spacing)
+
             if rng < 1000*60:
                 string = '%Mm:%Ss '
             elif rng >= 1000*60 and rng < 1000*3600:

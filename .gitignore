@@ -1,0 +1,8 @@
+*.log
+build/
+synth.csv
+trace.txt
+*.pyc
+*.swp
+setting
+*.st

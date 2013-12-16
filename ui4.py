@@ -422,8 +422,16 @@ class Ui_MainWindow(object):
 
         lst.reverse()
         self.splitter_2.setSizes(lst)
-            
+    
+    #특정한 파일이 열려있는지 정보를 저장
+    is_something_open = False
+
     def open(self):                         # 파일을 여는 함수. 확장자가 .csv이면 최초로 여는 것이고 .st이면 저장된 세팅을 불러와서 연다.
+    
+        if(self.is_something_open == True):
+            self.close()
+            self.is_something_open = False
+
         self.fname = ""
         fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
         name = fname.split("/") 
@@ -473,11 +481,11 @@ class Ui_MainWindow(object):
             #화살표 리스트 초기화
             self.arrow_lst = []
             self.arrow_setting_lst = []
+            
+            #파일이 열려있다는 것을 알려줌
+            self.is_something_open = True
 
         elif name[len(name)-1].split(".")[1] == "st":
-
-            if(self.file_name is not ""):
-                self.close()
 
             self.fname = fname
             f = open(name[len(name)-1], 'r')
@@ -551,6 +559,9 @@ class Ui_MainWindow(object):
                 num = roi['num']
                 shape = roi['shape']
                 self.restoreROI(coor, num, shape)
+            
+            #파일이 열려있다는 것을 알려줌
+            self.is_something_open = True
 
     def save_setting(self):
         # 화면 Layout을 저장한다. 표시되는 그래프의 수 및 각 layout의 크기를 저장.
@@ -634,6 +645,8 @@ class Ui_MainWindow(object):
 
         self.arrowParameter.remove()
         self.roiParameter.remove()
+
+        self.is_something_open = False
 
     #최초에 프로그램을 열 때 호출되는 함수로, 저장된 layout설정 파일이 있으면 파일을 열어서 설정을 복구한다.
     def restore(self, MainWindow):

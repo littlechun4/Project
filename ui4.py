@@ -475,6 +475,10 @@ class Ui_MainWindow(object):
             self.arrow_setting_lst = []
 
         elif name[len(name)-1].split(".")[1] == "st":
+
+            if(self.file_name is not ""):
+                self.close()
+
             self.fname = fname
             f = open(name[len(name)-1], 'r')
             settings = pickle.load(f)
@@ -520,6 +524,8 @@ class Ui_MainWindow(object):
             self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
             self.treeWidget_2.setParameters(self.parameter, showTop=False)
 
+
+            del self.graph
             self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
             self.graph.restoreRegion(settings['region_width'])
 

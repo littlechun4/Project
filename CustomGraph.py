@@ -247,7 +247,7 @@ class CustomGraph(pg.GraphicsObject):
         '''
         파일의 정보에 따라 Region을 복구한다.
         '''
-
+        
         for i in range(7, 0, -1):
             self.region_lst[i].setRegion(width_lst[i])
             if(i != 0):

@@ -112,14 +112,14 @@ class Ui_Dialog(object):
 	def retranslateUi(self, Dialog):
 		Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
 		self.pushButton.setText(QtGui.QApplication.translate("Dialog", "확인", None, QtGui.QApplication.UnicodeUTF8))
-		self.label.setText(QtGui.QApplication.translate("Dialog", "Graph 1", None, QtGui.QApplication.UnicodeUTF8))
-		self.label_2.setText(QtGui.QApplication.translate("Dialog", "Graph 2", None, QtGui.QApplication.UnicodeUTF8))
-		self.label_3.setText(QtGui.QApplication.translate("Dialog", "Graph 3", None, QtGui.QApplication.UnicodeUTF8))
-		self.label_4.setText(QtGui.QApplication.translate("Dialog", "Graph 4", None, QtGui.QApplication.UnicodeUTF8))
-		self.label_5.setText(QtGui.QApplication.translate("Dialog", "Graph 5", None, QtGui.QApplication.UnicodeUTF8))
-		self.label_6.setText(QtGui.QApplication.translate("Dialog", "Graph 6", None, QtGui.QApplication.UnicodeUTF8))
-		self.label_7.setText(QtGui.QApplication.translate("Dialog", "Graph 7", None, QtGui.QApplication.UnicodeUTF8))
-		self.label_8.setText(QtGui.QApplication.translate("Dialog", "Graph 8", None, QtGui.QApplication.UnicodeUTF8))
+		self.label.setText(QtGui.QApplication.translate("Dialog", "Level 8", None, QtGui.QApplication.UnicodeUTF8))
+		self.label_2.setText(QtGui.QApplication.translate("Dialog", "Level 7", None, QtGui.QApplication.UnicodeUTF8))
+		self.label_3.setText(QtGui.QApplication.translate("Dialog", "Level 6", None, QtGui.QApplication.UnicodeUTF8))
+		self.label_4.setText(QtGui.QApplication.translate("Dialog", "Level 5", None, QtGui.QApplication.UnicodeUTF8))
+		self.label_5.setText(QtGui.QApplication.translate("Dialog", "Level 4", None, QtGui.QApplication.UnicodeUTF8))
+		self.label_6.setText(QtGui.QApplication.translate("Dialog", "Level 3", None, QtGui.QApplication.UnicodeUTF8))
+		self.label_7.setText(QtGui.QApplication.translate("Dialog", "Level 2", None, QtGui.QApplication.UnicodeUTF8))
+		self.label_8.setText(QtGui.QApplication.translate("Dialog", "Level 1", None, QtGui.QApplication.UnicodeUTF8))
 		self.label_9.setText(QtGui.QApplication.translate("Dialog", "Max", None, QtGui.QApplication.UnicodeUTF8))
 		self.label_10.setText(QtGui.QApplication.translate("Dialog", "Min", None, QtGui.QApplication.UnicodeUTF8))
 
@@ -135,6 +135,9 @@ class DataStat_Dialog(QtGui.QDialog):
 		self.dialog.show()
 		self.dialog.exec_()
 
+    """
+    __init__에서 받아온 value로 lineedit들을 값을 맞춰준다.
+    """
 	def setValue(self, values):
 		for (value, line) in zip(values['max'], reversed(self.ui.max_lst)):
 			line.setText(str(value))

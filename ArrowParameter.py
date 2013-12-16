@@ -34,6 +34,9 @@ class ArrowParameter(pTypes.GroupParameter):
         self.num += 1
         return self.num - 1
 
+    """
+    저장된 화살표를 복구할 때 사용하는 함수
+    """
     def restoreArrow(self, x_pos, y_pos, num, arrow_type):
         self.addChild({'name': 'Arrow' + str(num), 'type': 'group', 'children': [
             {'name': 'X-Position', 'type': 'str', 'value': x_pos, 'readonly': True},

@@ -322,7 +322,7 @@ class Ui_MainWindow(object):
         self.actionRemove_All.triggered.connect(self.removeROIAll)
 
         """
-        팝업 관련 모음
+        배경 칠하기 기능 관련 모음
         """
         self.actionBG_Fill.triggered.connect(self.bg_fill)
         self.bg_rect_lst = []
@@ -331,9 +331,13 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.restore(MainWindow)
 
-        self.actionMax_Min.triggered.connect(self.data_stat)
         """
-    
+        Max Min 기능 연결
+        """
+        self.actionMax_Min.triggered.connect(self.data_stat)
+
+        """
+        control panel의 tree widget에 mainwindow를 넘겨줌
         """
         self.treeWidget.setMainWindow(self)
         self.treeWidget_2.setMainWindow(self)
@@ -507,6 +511,7 @@ class Ui_MainWindow(object):
             self.times = []
             self.lst = [] 
 
+            # csv 파일 파싱
             for dt in rd2.dt:
                 try:
                     t = time.strptime(dt, '%Y-%m-%d %H:%M:%S.%f')
@@ -723,6 +728,11 @@ class Ui_MainWindow(object):
         self.arrow_setting_lst.append({'x': x, 'y': y, 'num': num, 'type': arrow_type})
 
 
+    """
+    item으로 받은 화살표를 제거할 때에 사용된다.
+    그래프 상에서 제거할 뿐만 아니라 parameter에서 제거할 수 있도록
+    parameter의 제거 함수를 호출한다.
+    """
     def removeArrow(self, item):
         arrow_num = int(item.text(0).split("Arrow")[1])
         
@@ -840,6 +850,10 @@ class Ui_MainWindow(object):
                     ((x1, _), (x2, _)) = roi_setting['coor']
                     self.graph.parameterScroll((x1 + x2) / 2, self.plotwidget_lst)
 
+    """
+    지정된 영역에 대해 배경색을 변경하도록 한다.
+    시작 일시와 종료 일시 모두 현 그래프의 시작점으로 맞춰준다.
+    """
     def bg_fill(self):
         self.bg = BG_Popup.BGFill_Dialog(self.times[0])
         value = self.bg.activate()
@@ -861,7 +875,11 @@ class Ui_MainWindow(object):
             rect.setZValue(-1000)
             widget.addItem(rect)
             self.bg_rect_lst.append(rect)
-    
+
+    """
+    Max와 Min을 보여주는 기능. 그래프 별로 보이는 영역의 범위를 얻어온 뒤
+    그 안에 해당하는 y축 값들에서 최대 최소인 값을 찾아낸 뒤 팝업에 넘겨준다.
+    """
     def data_stat(self):
         max_lst = []
         min_lst = []

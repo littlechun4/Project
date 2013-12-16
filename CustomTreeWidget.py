@@ -23,6 +23,10 @@ class MyTreeWidget(ParameterTree):
         self.actionRemove.triggered.connect(self.remove)
         self.actionRemoveAll.triggered.connect(self.remove_all)
 
+
+        """
+        우클릭하면 뜨는 메뉴들 설정
+        """
         self.popMenu = QtGui.QMenu(self)
         self.popMenu.addAction(self.actionRemove)
         self.popMenu.addAction(self.actionRemoveAll)
@@ -41,6 +45,9 @@ class MyTreeWidget(ParameterTree):
 
         #self.main_window = main_window
 
+    """
+    더블 클릭시 왼쪽 버튼이면 스크롤을 호출
+    """
     def mouseDoubleClickEvent(self, event):
         super(MyTreeWidget, self).mouseDoubleClickEvent(event)
         name = super(MyTreeWidget, self).itemAt(event.pos()).text(0)
@@ -48,6 +55,9 @@ class MyTreeWidget(ParameterTree):
             if name == "X-Position" or name == "Y-Position" or name == "Type" or name == "Shape":
                 self.main_window.parameterScroll(super(MyTreeWidget,self).itemAt(event.pos()).parent().text(0))
 
+    """
+    클릭 시 우측 버튼이면 삭제 팝업 메뉴 띄움
+    """
     def mousePressEvent(self, event):
         super(MyTreeWidget, self).mousePressEvent(event)
 
@@ -62,11 +72,17 @@ class MyTreeWidget(ParameterTree):
             elif super(MyTreeWidget, self).itemAt(event.pos()).text(0).contains("ROI"):
                 self.pos = event.pos()
                 self.popMenuROI.exec_(event.globalPos())    
-
+    
+    """
+    parameter에서 arrow를 삭제함
+    """
     def remove(self, arrow_name):
         self.main_window.removeArrow(super(MyTreeWidget, self).itemAt(self.pos))
         #super(MyTreeWidget, self).itemAt(self.pos).parent().removeChild(super(MyTreeWidget, self).itemAt(self.pos))
 
+    """
+    화살표 전부 삭제
+    """
     def remove_all(self):
         self.main_window.removeArrowAll()
 

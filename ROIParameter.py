@@ -37,6 +37,7 @@ class ROIParameter(pTypes.GroupParameter):
         self.roi_num = num + 1
     
     def removeROI(self, name):
+        '''ROI의 삭제에 쓰이는 메서드이다.'''
         for child in self.children():
             if child.name() == name:
                 self.removeChild(child) 

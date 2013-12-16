@@ -426,17 +426,18 @@ class Ui_MainWindow(object):
     #특정한 파일이 열려있는지 정보를 저장
     is_something_open = False
 
-    def open(self):                         # 파일을 여는 함수. 확장자가 .csv이면 최초로 여는 것이고 .st이면 저장된 세팅을 불러와서 연다.
-    
-        if(self.is_something_open == True):
-            self.close()
-            self.is_something_open = False
+    def open(self):                         # 파일을 여는 함수. 확장자가 .csv이면 최초로 여는 것이고 .st이면 저장된 세팅을 불러와서 연다. 
 
         self.fname = ""
         fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
         name = fname.split("/") 
         
-        if name[len(name)-1][-4:] == '.csv': 
+        if name[len(name)-1][-4:] == '.csv':
+
+            if(self.is_something_open == True):
+                self.close()
+                self.is_something_open = False
+                
             self.file_name = name[len(name)-1]
             rd = pd.read_csv(str(fname), index_col=[0], header=None, names=['dt', 'value'])
             rd2 = pd.read_csv(str(fname), header=None, names=['dt', ''])
@@ -487,6 +488,10 @@ class Ui_MainWindow(object):
 
         elif name[len(name)-1].split(".")[1] == "st":
 
+            if(self.is_something_open == True):
+                self.close()
+                self.is_something_open = False
+
             self.fname = fname
             f = open(name[len(name)-1], 'r')
             settings = pickle.load(f)
@@ -532,8 +537,6 @@ class Ui_MainWindow(object):
             self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
             self.treeWidget_2.setParameters(self.parameter, showTop=False)
 
-
-            del self.graph
             self.graph = CustomGraph(self.lst, self.plotwidget_lst, self.times)
             self.graph.restoreRegion(settings['region_width'])
 
@@ -754,19 +757,32 @@ class Ui_MainWindow(object):
     
     timer = 0
 
+    #스크롤이 현재 진행되고 있는지 저장
     scroll_active = False
+    #이벤트 함수 호출을 위한 타이머 오브젝트 저장공간
     timer = 0
+    #1초당 움직이는 범위
     velocity = 10
+    #스크롤 할 그래프의 레벨
     scroll_level = 1
+    #스크롤 하면서 움직일 애로우 오브젝트 저장공간
     curve_arrow = 0
 
     def scrollEvent(self):
+        """
+        스크롤 시 타이머에 의해 호출되어 그래프를 스크롤하는 함수
+        """
         cont = self.graph.scroll(self.plotwidget_lst[8-self.scroll_level], self.scroll_level, self.velocity, self.curve_arrow)
+        
+        #자동스크롤 시 화면 범위를 넘어가면 콘솔에 메세지를 출력하고 스크롤이 중단됨
         if cont == False:
             print('Out of Bonud!')
             self.pauseScroll()
     
     def startScroll(self):    
+        """
+
+        """
         if(self.timer!=0):
             return
         

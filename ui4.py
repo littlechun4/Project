@@ -33,6 +33,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
@@ -55,21 +56,21 @@ class Ui_MainWindow(object):
         self.splitter_2 = QtGui.QSplitter(self.splitter_3)
         self.splitter_2.setOrientation(QtCore.Qt.Vertical)
         self.splitter_2.setObjectName(_fromUtf8("splitter_2"))
-        self.graphicsView_8 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
+        self.graphicsView_8 = PlotWidget(self.splitter_2, axisItems={'bottom': CustomAxis(orientation='bottom')})
         self.graphicsView_8.setObjectName(_fromUtf8("graphicsView_8"))
-        self.graphicsView_7 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
+        self.graphicsView_7 = PlotWidget(self.splitter_2, axisItems={'bottom': CustomAxis(orientation='bottom')})
         self.graphicsView_7.setObjectName(_fromUtf8("graphicsView_7"))
-        self.graphicsView_6 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
+        self.graphicsView_6 = PlotWidget(self.splitter_2, axisItems={'bottom': CustomAxis(orientation='bottom')})
         self.graphicsView_6.setObjectName(_fromUtf8("graphicsView_6"))
-        self.graphicsView_5 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
+        self.graphicsView_5 = PlotWidget(self.splitter_2, axisItems={'bottom': CustomAxis(orientation='bottom')})
         self.graphicsView_5.setObjectName(_fromUtf8("graphicsView_5"))
-        self.graphicsView_4 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
+        self.graphicsView_4 = PlotWidget(self.splitter_2, axisItems={'bottom': CustomAxis(orientation='bottom')})
         self.graphicsView_4.setObjectName(_fromUtf8("graphicsView_4"))
-        self.graphicsView_3 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
+        self.graphicsView_3 = PlotWidget(self.splitter_2, axisItems={'bottom': CustomAxis(orientation='bottom')})
         self.graphicsView_3.setObjectName(_fromUtf8("graphicsView_3"))
-        self.graphicsView_2 = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
+        self.graphicsView_2 = PlotWidget(self.splitter_2, axisItems={'bottom': CustomAxis(orientation='bottom')})
         self.graphicsView_2.setObjectName(_fromUtf8("graphicsView_2"))
-        self.graphicsView = PlotWidget(self.splitter_2, axisItems={'bottom':CustomAxis(orientation='bottom')})
+        self.graphicsView = PlotWidget(self.splitter_2, axisItems={'bottom': CustomAxis(orientation='bottom')})
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
         self.gridLayout.addWidget(self.splitter_3, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -397,10 +398,9 @@ class Ui_MainWindow(object):
         self.actionBG_Fill.setText(QtGui.QApplication.translate("MainWindow", "BG_Fill", None, QtGui.QApplication.UnicodeUTF8))
         self.actionMax_Min.setText(QtGui.QApplication.translate("MainWindow", "Max_Min", None, QtGui.QApplication.UnicodeUTF8))
 
-
     def setSize(self, MainWindow):          # 저장된 설정 파일이 없을 때 최초로 ui 크기를 설정해 주는 함수
         width = MainWindow.width()
-        self.splitter_3.setSizes([width/4, 3*width/4])
+        self.splitter_3.setSizes([width / 4, 3 * width / 4])
         self.graphicsView_8.hide()
         self.graphicsView_7.hide()
         self.graphicsView_6.hide()
@@ -412,7 +412,7 @@ class Ui_MainWindow(object):
     def graphWindow(self, num):             # 인자로 받는 num의 수만큼 그래프를 표시해주고 크기도 균등하게 나눔.
         self.num = num
         idx = 0
-        width = self.splitter_2.height()/num
+        width = self.splitter_2.height() / num
         lst = []
 
         for graph in reversed(self.plotwidget_lst):
@@ -426,28 +426,28 @@ class Ui_MainWindow(object):
 
         lst.reverse()
         self.splitter_2.setSizes(lst)
-    
+
     #특정한 파일이 열려있는지 정보를 저장
     is_something_open = False
 
-    def open(self):                         # 파일을 여는 함수. 확장자가 .csv이면 최초로 여는 것이고 .st이면 저장된 세팅을 불러와서 연다. 
+    def open(self):                         # 파일을 여는 함수. 확장자가 .csv이면 최초로 여는 것이고 .st이면 저장된 세팅을 불러와서 연다.
 
         self.fname = ""
-        fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/') 
-        name = fname.split("/") 
-        
-        if name[len(name)-1][-4:] == '.csv':
+        fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '~/')
+        name = fname.split("/")
+
+        if name[len(name) - 1][-4:] == '.csv':
 
             if(self.is_something_open == True):
                 self.close()
                 self.is_something_open = False
-                
-            self.file_name = name[len(name)-1]
+
+            self.file_name = name[len(name) - 1]
             rd = pd.read_csv(str(fname), index_col=[0], header=None, names=['dt', 'value'])
             rd2 = pd.read_csv(str(fname), header=None, names=['dt', ''])
 
             self.times = []
-            self.lst = [] 
+            self.lst = []
 
             """
             시간 정보를 받아서 timestamp 형태로 변환
@@ -455,7 +455,7 @@ class Ui_MainWindow(object):
             for dt in rd2.dt:
                 try:
                     t = time.strptime(dt, '%Y-%m-%d %H:%M:%S.%f')
-                    stamp = time.mktime(t) * 1000 + t.microsecond/1000
+                    stamp = time.mktime(t) * 1000 + t.microsecond / 1000
                 except:
                     stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S')) * 1000
 
@@ -464,9 +464,9 @@ class Ui_MainWindow(object):
             """
             depth 정보를 리스트에 저장함.
             """
-            for val in rd.value: 
-                self.lst += [val] 
-            
+            for val in rd.value:
+                self.lst += [val]
+
             """
             parameter를 초기화하고 widget에 추가해 줌.
             """
@@ -486,21 +486,21 @@ class Ui_MainWindow(object):
             #화살표 리스트 초기화
             self.arrow_lst = []
             self.arrow_setting_lst = []
-            
+
             #파일이 열려있다는 것을 알려줌
             self.is_something_open = True
 
-        elif name[len(name)-1].split(".")[1] == "st":
+        elif name[len(name) - 1].split(".")[1] == "st":
 
             if(self.is_something_open == True):
                 self.close()
                 self.is_something_open = False
 
             self.fname = fname
-            f = open(name[len(name)-1], 'r')
+            f = open(name[len(name) - 1], 'r')
             settings = pickle.load(f)
             f.close()
-        
+
             self.file_name = (settings['file_name'])
 
             #Layout 설정 복구
@@ -514,25 +514,25 @@ class Ui_MainWindow(object):
             rd2 = pd.read_csv(str(settings['file_name']), header=None, names=['dt', ''])
 
             self.times = []
-            self.lst = [] 
+            self.lst = []
 
             # csv 파일 파싱
             for dt in rd2.dt:
                 try:
                     t = time.strptime(dt, '%Y-%m-%d %H:%M:%S.%f')
-                    stamp = time.mktime(t) * 1000 + t.microsecond/1000
+                    stamp = time.mktime(t) * 1000 + t.microsecond / 1000
                 except:
                     stamp = time.mktime(time.strptime(dt, '%Y-%m-%d %H:%M:%S')) * 1000
 
                 self.times += [stamp]
 
-            for val in rd.value: 
-                self.lst += [val] 
-                  
+            for val in rd.value:
+                self.lst += [val]
+
             #화살표 리스트 초기화
             self.arrow_lst = []
             self.arrow_setting_lst = []
-                        
+
             self.arrowParameter = ArrowParameter(name='Arrow')
             self.parameter = Parameter.create(name='Arrow', type='group', children=[self.arrowParameter])
             self.treeWidget_2.setParameters(self.parameter, showTop=False)
@@ -554,7 +554,7 @@ class Ui_MainWindow(object):
                 num = arrow['num']
                 arrow_type = arrow['type']
                 self.arrowRestore(x, y, num, arrow_type)
-    
+
             #ROI Controller
             self.roic = ROIController(self)
             self.roi_setting_lst = []
@@ -567,7 +567,7 @@ class Ui_MainWindow(object):
                 num = roi['num']
                 shape = roi['shape']
                 self.restoreROI(coor, num, shape)
-            
+
             #파일이 열려있다는 것을 알려줌
             self.is_something_open = True
 
@@ -585,19 +585,19 @@ class Ui_MainWindow(object):
         f = open('setting', 'w+')
         pickle.dump(settings, f)
         f.close()
-        
+
     def save(self):                     # 저장해야 될 정보를 저장하는 함수. pickle을 이용해서 저장한다.
         if self.fname is not "":
-            pass            
+            pass
         else:
             self.fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file', '~/') + ".st"
 
         name = self.fname.split("/")
-        
+
         region_width_lst = []           # 파일 이름 및 Region 저장
         for region in self.graph.region_lst:
             region_width_lst.append(region.getRegion())
-        
+
         main_setting = self.splitter_3.sizes()
         control_setting = self.splitter.sizes()
         graph_setting = self.splitter_2.sizes()
@@ -609,10 +609,9 @@ class Ui_MainWindow(object):
 
         settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst, 'roi': self.roi_setting_lst}
 
-        f = open(name[len(name)-1], 'w+')
+        f = open(name[len(name) - 1], 'w+')
         pickle.dump(settings, f)
         f.close()
-        
 
     """
     최초로 save할 때와 같은 함수 내용을 사용한다.
@@ -620,11 +619,11 @@ class Ui_MainWindow(object):
     def save_as(self):
         self.fname = QtGui.QFileDialog.getSaveFileName(None, 'Save file As', '~/') + ".st"
         name = self.fname.split("/")
-        
+
         region_width_lst = []           # 파일 이름 및 Region 저장
         for region in self.graph.region_lst:
             region_width_lst.append(region.getRegion())
-        
+
         main_setting = self.splitter_3.sizes()
         control_setting = self.splitter.sizes()
         graph_setting = self.splitter_2.sizes()
@@ -636,10 +635,10 @@ class Ui_MainWindow(object):
 
         settings = {'file_name': self.file_name, 'region_width': region_width_lst, 'main': main_setting, 'control': control_setting, 'graph': graph_setting, 'graph_num': graph_num, 'arrow': self.arrow_setting_lst, 'roi': self.roi_setting_lst}
 
-        f = open(name[len(name)-1], 'w+')
+        f = open(name[len(name) - 1], 'w+')
         pickle.dump(settings, f)
         f.close()
-        
+
     """
     저장 파일의 이름을 초기화하고 widget에서 plot을 지우고 ROI와 Arrow Parameter를 지운다.
     """
@@ -665,7 +664,7 @@ class Ui_MainWindow(object):
             self.splitter.setSizes(settings['control'])
             self.graphWindow(settings['graph_num'])
             self.splitter_2.setSizes(settings['graph'])
-        
+
         except IOError:
             self.setSize(MainWindow)
             self.graphWindow(1)
@@ -692,15 +691,15 @@ class Ui_MainWindow(object):
             else:
                 arrow = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=20, tailLen=20, tailWidth=10, brush='r')
 
-            x1, x2 = self.plotwidget_lst[7-self.num+1].getViewBox().viewRange()[0]
-            x_pos = (x2-x1)/2 + x1
-            i = bisect_right(self.times, x_pos) 
+            x1, x2 = self.plotwidget_lst[7 - self.num + 1].getViewBox().viewRange()[0]
+            x_pos = (x2 - x1) / 2 + x1
+            i = bisect_right(self.times, x_pos)
             arrow.setPos(self.times[i], self.lst[i])
             widget.addItem(arrow)
             arrow_lst.append(arrow)
-        
+
         self.arrow_lst.append(arrow_lst)
-        num = self.arrowParameter.addArrow(datetime.fromtimestamp(x_pos/1000).strftime('%y-%m-%d %H:%M:%S'), self.lst[i], arrow_type)
+        num = self.arrowParameter.addArrow(datetime.fromtimestamp(x_pos / 1000).strftime('%y-%m-%d %H:%M:%S'), self.lst[i], arrow_type)
         self.arrow_setting_lst.append({'x': self.times[i], 'y': self.lst[i], 'num': num, 'type': arrow_type})
 
     """
@@ -727,9 +726,8 @@ class Ui_MainWindow(object):
             arrow_lst.append(arrow)
 
         self.arrow_lst.append(arrow_lst)
-        self.arrowParameter.restoreArrow(datetime.fromtimestamp(x/1000).strftime('%y-%m-%d %H:%M:%S'), y, num, arrow_type)
+        self.arrowParameter.restoreArrow(datetime.fromtimestamp(x / 1000).strftime('%y-%m-%d %H:%M:%S'), y, num, arrow_type)
         self.arrow_setting_lst.append({'x': x, 'y': y, 'num': num, 'type': arrow_type})
-
 
     """
     item으로 받은 화살표를 제거할 때에 사용된다.
@@ -738,7 +736,7 @@ class Ui_MainWindow(object):
     """
     def removeArrow(self, item):
         arrow_num = int(item.text(0).split("Arrow")[1])
-        
+
         i = 0
         for arrow_setting in self.arrow_setting_lst:
             if arrow_setting['num'] == arrow_num:
@@ -748,11 +746,10 @@ class Ui_MainWindow(object):
 
         for (arrow, widget) in zip(self.arrow_lst[i], self.plotwidget_lst):
             widget.removeItem(arrow)
-        
-        
+
         self.arrow_setting_lst.remove(d)
         self.arrowParameter.removeArrow(item.text(0))
-            
+
     """
     모든 화살표를 제거한다. parameter도 함께 제거함.
     """
@@ -764,7 +761,7 @@ class Ui_MainWindow(object):
         self.arrow_lst = []
         self.arrow_setting_lst = []
         self.arrowParameter.removeArrowAll()
-    
+
     timer = 0
 
     #스크롤이 현재 진행되고 있는지 저장
@@ -782,31 +779,31 @@ class Ui_MainWindow(object):
         """
         자동스크롤 시 타이머에 의해 호출되어 그래프를 스크롤한다
         """
-        cont = self.graph.scroll(self.plotwidget_lst[8-self.scroll_level], self.scroll_level, self.velocity, self.curve_arrow)
-        
+        cont = self.graph.scroll(self.plotwidget_lst[8 - self.scroll_level], self.scroll_level, self.velocity, self.curve_arrow)
+
         #자동스크롤 시 화면 범위를 넘어가면 콘솔에 메세지를 출력하고 스크롤이 중단함
         if cont == False:
             print('Out of Bonud!')
             self.pauseScroll()
-    
-    def startScroll(self):    
+
+    def startScroll(self):
         """
         자동스크롤을 시작한다
         """
 
         #스크롤이 Stop상태가 아니면 동작하지 않음
-        if(self.timer!=0):
+        if(self.timer != 0):
             return
-        
+
         #CurveArrow의 위치를 계산
-        cur_viewrange = self.plotwidget_lst[8-self.scroll_level].getViewBox().viewRange()[0]
-        cur_region = self.graph.region_lst[8-self.scroll_level].getRegion()
-        cur_region_mid = (cur_region[0] + cur_region[1])/2
+        cur_viewrange = self.plotwidget_lst[8 - self.scroll_level].getViewBox().viewRange()[0]
+        cur_region = self.graph.region_lst[8 - self.scroll_level].getRegion()
+        cur_region_mid = (cur_region[0] + cur_region[1]) / 2
         cur_index = bisect_left(self.graph.times, cur_region_mid)
 
         #CurveArrow를 추가해줌
-        self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8-self.scroll_level].getPlotItem().listDataItems()[0], index=cur_index)
-        self.plotwidget_lst[8-self.scroll_level].addItem(self.curve_arrow)
+        self.curve_arrow = pg.CurveArrow(self.plotwidget_lst[8 - self.scroll_level].getPlotItem().listDataItems()[0], index=cur_index)
+        self.plotwidget_lst[8 - self.scroll_level].addItem(self.curve_arrow)
 
         #타이머 오브젝트 생성
         self.timer = QtCore.QTimer()
@@ -852,7 +849,7 @@ class Ui_MainWindow(object):
             self.timer = 0
 
             #CurveArrow제거
-            self.plotwidget_lst[8-self.scroll_level].removeItem(self.curve_arrow)
+            self.plotwidget_lst[8 - self.scroll_level].removeItem(self.curve_arrow)
             del self.curve_arrow
             self.curve_arrow = 0
 
@@ -885,7 +882,9 @@ class Ui_MainWindow(object):
                     self.graph.parameterScroll(arrow_setting['x'], self.plotwidget_lst)
         else:
             for roi_setting in self.roi_setting_lst:
-                if roi_setting['num'] == int(num):
+                if roi_setting == None:
+                    continue
+                elif roi_setting['num'] == int(num):
                     ((x1, _), (x2, _)) = roi_setting['coor']
                     self.graph.parameterScroll((x1 + x2) / 2, self.plotwidget_lst)
 
@@ -904,12 +903,12 @@ class Ui_MainWindow(object):
 
         start = value['start']
         end = value['end']
-    
+
         start_stamp = time.mktime(datetime(start['year'], start['month'], start['day'], start['time'].hour(), start['time'].minute(), start['time'].second()).timetuple()) * 1000
         end_stamp = time.mktime(datetime(end['year'], end['month'], end['day'], end['time'].hour(), end['time'].minute(), end['time'].second()).timetuple()) * 1000
-        
+
         for widget in self.plotwidget_lst:
-            rect = pg.QtGui.QGraphicsRectItem(start_stamp, -10000, end_stamp-start_stamp, 20000)
+            rect = pg.QtGui.QGraphicsRectItem(start_stamp, -10000, end_stamp - start_stamp, 20000)
             rect.setBrush(pg.mkBrush('#C9BB89'))
             rect.setZValue(-1000)
             widget.addItem(rect)
@@ -934,39 +933,39 @@ class Ui_MainWindow(object):
             else:
                 max_lst.append('empty')
                 min_lst.append('empty')
-        
+
         self.plotwidget_lst.reverse()
         values = {'max': max_lst, 'min': min_lst}
         ds = Data_Popup.DataStat_Dialog(values)
-    
+
     # ROI
     def dragev(self, ev, i, shape):
         '''ROI를 삽입할 때의 마우스 드래그 이벤트 관리 함수이다.
-        마우스로 드래그한 영역의 좌표를 계산하여, 이를 바탕으로 
+        마우스로 드래그한 영역의 좌표를 계산하여, 이를 바탕으로
         ROI를 삽입한다'''
 
         ev.accept()
         vb = self.plotwidget_lst[i].getViewBox()
         pos = ev.pos()
-        if self.roi_loc == 1 and ev.button() == QtCore.Qt.LeftButton:                                                                      
-            if ev.isFinish():                                                                                                                
+        if self.roi_loc == 1 and ev.button() == QtCore.Qt.LeftButton:
+            if ev.isFinish():
                 vb.rbScaleBox.hide()
                 # set region
                 _, _, xax, yax = vb.rect().getCoords()
                 x1, x2 = self.plotwidget_lst[i].getViewBox().viewRange()[0]
                 y1, y2 = self.plotwidget_lst[i].getViewBox().viewRange()[1]
                 p1, p2 = ev.buttonDownPos(ev.button()), pos
-                xlen, ylen = x2-x1, y2-y1
-                fx1 = x1 + xlen*p1.x()/xax
-                fy1 = y1 + ylen*(yax-p1.y())/yax
-                fx2 = x1 + xlen*p2.x()/xax
-                fy2 = y1 + ylen*(yax-p2.y())/yax
+                xlen, ylen = x2 - x1, y2 - y1
+                fx1 = x1 + xlen * p1.x() / xax
+                fy1 = y1 + ylen * (yax - p1.y()) / yax
+                fx2 = x1 + xlen * p2.x() / xax
+                fy2 = y1 + ylen * (yax - p2.y()) / yax
                 # make ROI
                 self.roic.setROI(shape, ((fx1, fy1), (fx2, fy2)))
                 self.roi_loc = 0
-                num = self.roiParameter.addROI(datetime.fromtimestamp((fx1+fx2)/2000).strftime('%y-%m-%d %H:%M:%S'), shape)
+                num = self.roiParameter.addROI(datetime.fromtimestamp((fx1 + fx2) / 2000).strftime('%y-%m-%d %H:%M:%S'), shape)
                 self.roi_setting_lst.append({'coor': ((fx1, fy1), (fx2, fy2)), 'num': num, 'shape': shape})
-            else:                                                                                                               
+            else:
                 vb.updateScaleBox(ev.buttonDownPos(), ev.pos())
         else:
             pg.ViewBox.mouseDragEvent(vb, ev)
@@ -974,7 +973,7 @@ class Ui_MainWindow(object):
     def setROI(self, shape):
         '''드래그로 범위 지정을 하기위해 위젯 뷰의 마우스
         이벤트를 조작한다.'''
-        
+
         self.roi_loc = 1
         self.plotwidget_lst[0].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 0, shape))
         self.plotwidget_lst[1].getViewBox().mouseDragEvent = (lambda ev: self.dragev(ev, 1, shape))
@@ -987,10 +986,10 @@ class Ui_MainWindow(object):
 
     def restoreROI(self, coor, num, shape):
         '''OPEN 시에 ROI를 복구하는 메서드이다'''
-        
+
         (x1, _), (x2, _) = coor
         self.roic.setROI(shape, coor)
-        self.roiParameter.restoreROI(datetime.fromtimestamp((x1+x2)/2000).strftime('%y-%m-%d %H:%M:%S'), num, shape)
+        self.roiParameter.restoreROI(datetime.fromtimestamp((x1 + x2) / 2000).strftime('%y-%m-%d %H:%M:%S'), num, shape)
         self.roi_setting_lst.append({'coor': coor, 'num': num, 'shape': shape})
 
     def removeROIByObj(self, roi):
@@ -1016,7 +1015,7 @@ class Ui_MainWindow(object):
                 self.roi_setting_lst[i] = None
                 self.roic.removeROI(i)
                 break
-        self.roiParameter.removeROI("ROI"+str(roi_num))
+        self.roiParameter.removeROI("ROI" + str(roi_num))
 
     def removeROIByItem(self, item):
         '''Parameter의 ROI 아이템을 인자로 받아 해당 ROI를 제거하는 메서드'''
@@ -1029,20 +1028,18 @@ class Ui_MainWindow(object):
                 self.roic.removeROI(i)
                 break
         self.roiParameter.removeROI(item.text(0))
-    
-    def popupROI(self):
-        ROIPopup(self)
 
     def removeROIAll(self):
         self.roic.removeAll()
         self.roiParameter.removeROIAll()
+
 
 class Window(QtGui.QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-    
+
     def keyPressEvent(self, event):
         """
         메인 윈도우의 키 입력을 처리한다
@@ -1051,56 +1048,55 @@ class Window(QtGui.QMainWindow):
         #Scroll mapping keys
 
         #Q -> 스크롤 시작
-        if (event.key()==QtCore.Qt.Key_Q):
+        if (event.key() == QtCore.Qt.Key_Q):
             self.ui.startScroll()
-        
+
         #W -> 스크롤 일시 정지
-        elif(event.key()==QtCore.Qt.Key_W):
+        elif(event.key() == QtCore.Qt.Key_W):
             self.ui.pauseScroll()
 
         #E -> 스크롤 재시작
-        elif(event.key()==QtCore.Qt.Key_E):
+        elif(event.key() == QtCore.Qt.Key_E):
             self.ui.resumeScroll()
 
         #R -> 스크롤 정지
-        elif(event.key()==QtCore.Qt.Key_R):
+        elif(event.key() == QtCore.Qt.Key_R):
             self.ui.stopScroll()
-        
+
         #Up -> 스크롤 속도 증가
-        elif(event.key()==QtCore.Qt.Key_Up):
+        elif(event.key() == QtCore.Qt.Key_Up):
             self.ui.velocity *= 1.25
-        
+
         #Down -> 스크롤 속도 감소
-        elif(event.key()==QtCore.Qt.Key_Down):
+        elif(event.key() == QtCore.Qt.Key_Down):
             self.ui.velocity *= 0.8
 
-        #Left -> 자동 스크롤 되지 않을 때 왼쪽으로 수동 스크롤(1/4 velocity만큼) 
-        elif(event.key()==QtCore.Qt.Key_Left):
+        #Left -> 자동 스크롤 되지 않을 때 왼쪽으로 수동 스크롤(1/4 velocity만큼)
+        elif(event.key() == QtCore.Qt.Key_Left):
             if(self.ui.scroll_active == False):
-                self.ui.graph.scroll(self.ui.plotwidget_lst[8-self.ui.scroll_level], self.ui.scroll_level, -1*self.ui.velocity, self.ui.curve_arrow)
-        
+                self.ui.graph.scroll(self.ui.plotwidget_lst[8 - self.ui.scroll_level], self.ui.scroll_level, -1 * self.ui.velocity, self.ui.curve_arrow)
+
         #Right -> 자동 스크롤 되지 않을 때 오른쪽으로 수동 스크롤
-        elif(event.key()==QtCore.Qt.Key_Right):
+        elif(event.key() == QtCore.Qt.Key_Right):
             if(self.ui.scroll_active == False):
-                self.ui.graph.scroll(self.ui.plotwidget_lst[8-self.ui.scroll_level], self.ui.scroll_level, self.ui.velocity, self.ui.curve_arrow)
+                self.ui.graph.scroll(self.ui.plotwidget_lst[8 - self.ui.scroll_level], self.ui.scroll_level, self.ui.velocity, self.ui.curve_arrow)
 
         # Arrow Mapping Keys
-        elif(event.key()==QtCore.Qt.Key_4):
+        elif(event.key() == QtCore.Qt.Key_4):
             self.ui.insertArrow(1)
-        elif(event.key()==QtCore.Qt.Key_5):
+        elif(event.key() == QtCore.Qt.Key_5):
             self.ui.insertArrow(2)
-        elif(event.key()==QtCore.Qt.Key_6):
+        elif(event.key() == QtCore.Qt.Key_6):
             self.ui.insertArrow(3)
-        elif(event.key()==QtCore.Qt.Key_7):
+        elif(event.key() == QtCore.Qt.Key_7):
             self.ui.insertArrow(4)
-        elif(event.key()==QtCore.Qt.Key_8):
+        elif(event.key() == QtCore.Qt.Key_8):
             self.ui.insertArrow(5)
-        elif(event.key()==QtCore.Qt.Key_9):
+        elif(event.key() == QtCore.Qt.Key_9):
             self.ui.insertArrow(6)
-        
+
     def closeEvent(self, event):
         self.ui.save_setting()
-
 
     #def mousePressEvent(self, event):
     #    print 'hi'
@@ -1115,4 +1111,3 @@ if __name__ == "__main__":
     MainWindow = Window()
     MainWindow.show()
     sys.exit(app.exec_())
-

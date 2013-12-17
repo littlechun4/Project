@@ -34,7 +34,7 @@ class ScrollPopup(QtGui.QWidget):
 
         #스크롤 속도가 1초보다 작은 경우에는 ms단위로 표시
         else:
-            self.velocity = QtGui.QLineEdit(QtCore.QString(str(self.ui.velocity*1000)), self)
+            self.velocity = QtGui.QLineEdit(QtCore.QString(str(self.ui.velocity * 1000)), self)
             self.unit.setCurrentIndex(1)
 
         self.text3 = QtGui.QLabel(QtCore.QString('Level to Scroll: '), self)
@@ -47,7 +47,7 @@ class ScrollPopup(QtGui.QWidget):
         self.scroll_level.addItem('6')
         self.scroll_level.addItem('7')
         self.scroll_level.addItem('8')
-        self.scroll_level.setCurrentIndex(self.ui.scroll_level-1)
+        self.scroll_level.setCurrentIndex(self.ui.scroll_level - 1)
 
         self.ok = QtGui.QPushButton('OK', self)
         self.cancel = QtGui.QPushButton('Cancel', self)
@@ -76,8 +76,8 @@ class ScrollPopup(QtGui.QWidget):
         self.ui.velocity = float(self.velocity.text())
         self.ui.scroll_level = self.scroll_level.currentIndex() + 1
 
-        if(self.unit.currentIndex()==1):
-            self.ui.velocity/=1000
+        if(self.unit.currentIndex() == 1):
+            self.ui.velocity /= 1000
 
         self.close()
 
@@ -86,4 +86,3 @@ class ScrollPopup(QtGui.QWidget):
         Cancel버튼이 눌렸을 때 값을 저장하지 않고 팝업을 닫는다.
         """
         self.close()
-

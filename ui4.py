@@ -882,7 +882,9 @@ class Ui_MainWindow(object):
                     self.graph.parameterScroll(arrow_setting['x'], self.plotwidget_lst)
         else:
             for roi_setting in self.roi_setting_lst:
-                if roi_setting['num'] == int(num):
+                if roi_setting == None:
+                    continue
+                elif roi_setting['num'] == int(num):
                     ((x1, _), (x2, _)) = roi_setting['coor']
                     self.graph.parameterScroll((x1 + x2) / 2, self.plotwidget_lst)
 
